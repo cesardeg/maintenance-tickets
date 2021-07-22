@@ -1,0 +1,52 @@
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+
+.my-nonflex-container {
+    width: 100%;
+    display: inline-block;
+    background-color: DodgerBlue;
+    text-align: justify;
+}
+
+.spacer {
+    display: inline-block;
+    margin: 0 auto;
+    background-color: black;
+}
+
+.my-nonflex-container>div {
+    background-color: #faffff;
+    width: 100px;
+    margin: 10px;
+    text-align: center;
+    line-height: 75px;
+    font-size: 30px;
+}
+
+.stretch {
+    width: 100%;
+    display: inline-block;
+    height: 20px;
+    background-color: #003060;
+    color: white;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.resize {
+    resize: both;
+    overflow: hidden;
+}
+
+.height-chart{
+    height: 500px;
+}

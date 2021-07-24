@@ -118,13 +118,13 @@
 										<div class="col-2">
 											<label for="acat_lunes" class="custom-control">Lunes</label>
 										</div>
-										<div class="input-group date col" id="acat_lunes_inicio" data-target-input="nearest">
+										<div class="input-group date col schedule-time" id="acat_lunes_inicio" data-target-input="nearest">
 											<input type="text" name="acat_lunes_i" class="form-control datetimepicker-input" data-target="#acat_lunes_inicio" value="{{ old('acat_lunes_i') }}"/>
 											<div class="input-group-append" data-target="#acat_lunes_inicio" data-toggle="datetimepicker">
 												<div class="input-group-text"><i class="fa fa-calendar"></i></div>
 											</div>
 										</div>
-										<div class="input-group date col" id="acat_lunes_termino" data-target-input="nearest">
+										<div class="input-group date col schedule-time" id="acat_lunes_termino" data-target-input="nearest">
 											<input type="text" name="acat_lunes_t" class="form-control datetimepicker-input" data-target="#acat_lunes_termino" value="{{ old('acat_lunes_t') }}"/>
 											<div class="input-group-append" data-target="#acat_lunes_termino" data-toggle="datetimepicker">
 												<div class="input-group-text"><i class="fa fa-calendar"></i></div>
@@ -137,13 +137,13 @@
 										<div class="col-2">
 											<label for="acat_martes" class="custom-control">Martes</label>
 										</div>
-										<div class="input-group date col" id="acat_martes_inicio" data-target-input="nearest">
+										<div class="input-group date col schedule-time" id="acat_martes_inicio" data-target-input="nearest">
 											<input type="text" name="acat_martes_i" class="form-control datetimepicker-input" data-target="#acat_martes_inicio" value="{{ old('acat_martes_i') }}"/>
 											<div class="input-group-append" data-target="#acat_martes_inicio" data-toggle="datetimepicker">
 												<div class="input-group-text"><i class="fa fa-calendar"></i></div>
 											</div>
 										</div>
-										<div class="input-group date col" id="acat_martes_termino" data-target-input="nearest">
+										<div class="input-group date col schedule-time" id="acat_martes_termino" data-target-input="nearest">
 											<input type="text" name="acat_martes_t" class="form-control datetimepicker-input" data-target="#acat_martes_termino" value="{{ old('acat_martes_t') }}"/>
 											<div class="input-group-append" data-target="#acat_martes_termino" data-toggle="datetimepicker">
 												<div class="input-group-text"><i class="fa fa-calendar"></i></div>
@@ -156,13 +156,13 @@
 										<div class="col-2">
 											<label for="acat_miercoles" class="custom-control">Miercoles</label>
 										</div>
-										<div class="input-group date col" id="acat_mier_inicio" data-target-input="nearest">
+										<div class="input-group date col schedule-time" id="acat_mier_inicio" data-target-input="nearest">
 											<input type="text" name="acat_miercoles_i" class="form-control datetimepicker-input" data-target="#acat_mier_inicio" value="{{ old('acat_miercoles_i') }}"/>
 											<div class="input-group-append" data-target="#acat_mier_inicio" data-toggle="datetimepicker">
 												<div class="input-group-text"><i class="fa fa-calendar"></i></div>
 											</div>
 										</div>
-										<div class="input-group date col" id="acat_mier_termino" data-target-input="nearest">
+										<div class="input-group date col schedule-time" id="acat_mier_termino" data-target-input="nearest">
 											<input type="text" name="acat_miercoles_t" class="form-control datetimepicker-input" data-target="#acat_mier_termino" value="{{ old('acat_miercoles_t') }}"/>
 											<div class="input-group-append" data-target="#acat_mier_termino" data-toggle="datetimepicker">
 												<div class="input-group-text"><i class="fa fa-calendar"></i></div>
@@ -175,13 +175,13 @@
 										<div class="col-2">
 											<label for="acat_jueves" class="custom-control">Jueves</label>
 										</div>
-										<div class="input-group date col" id="acat_jueves_inicio" data-target-input="nearest">
+										<div class="input-group date col schedule-time" id="acat_jueves_inicio" data-target-input="nearest">
 											<input type="text" name="acat_jueves_i" class="form-control datetimepicker-input" data-target="#acat_jueves_inicio" value="{{ old('acat_jueves_i') }}"/>
 											<div class="input-group-append" data-target="#acat_jueves_inicio" data-toggle="datetimepicker">
 												<div class="input-group-text"><i class="fa fa-calendar"></i></div>
 											</div>
 										</div>
-										<div class="input-group date col" id="acat_jueves_termino" data-target-input="nearest">
+										<div class="input-group date col schedule-time" id="acat_jueves_termino" data-target-input="nearest">
 											<input type="text" name="acat_jueves_t" class="form-control datetimepicker-input" data-target="#acat_jueves_termino" value="{{ old('acat_jueves_t') }}"/>
 											<div class="input-group-append" data-target="#acat_jueves_termino" data-toggle="datetimepicker">
 												<div class="input-group-text"><i class="fa fa-calendar"></i></div>
@@ -194,13 +194,13 @@
 										<div class="col-2">
 											<label for="acat_viernes" class="custom-control">Viernes</label>
 										</div>
-										<div class="input-group date col" id="acat_viernes_inicio" data-target-input="nearest">
+										<div class="input-group date col schedule-time" id="acat_viernes_inicio" data-target-input="nearest">
 											<input type="text" name="acat_viernes_i" class="form-control datetimepicker-input" data-target="#acat_viernes_inicio" value="{{ old('acat_viernes_i') }}"/>
 											<div class="input-group-append" data-target="#acat_viernes_inicio" data-toggle="datetimepicker">
 												<div class="input-group-text"><i class="fa fa-calendar"></i></div>
 											</div>
 										</div>
-										<div class="input-group date col" id="acat_viernes_termino" data-target-input="nearest">
+										<div class="input-group date col schedule-time" id="acat_viernes_termino" data-target-input="nearest">
 											<input type="text" name="acat_viernes_t" class="form-control datetimepicker-input" data-target="#acat_viernes_termino" value="{{ old('acat_viernes_t') }}"/>
 											<div class="input-group-append" data-target="#acat_viernes_termino" data-toggle="datetimepicker">
 												<div class="input-group-text"><i class="fa fa-calendar"></i></div>
@@ -213,13 +213,13 @@
 										<div class="col-2">
 											<label for="acat_sabado" class="custom-control">Sábado</label>
 										</div>
-										<div class="input-group date col" id="acat_sabado_inicio" data-target-input="nearest">
+										<div class="input-group date col schedule-time" id="acat_sabado_inicio" data-target-input="nearest">
 											<input type="text" name="acat_sabado_i" class="form-control datetimepicker-input" data-target="#acat_sabado_inicio" value="{{ old('acat_sabado_i') }}"/>
 											<div class="input-group-append" data-target="#acat_sabado_inicio" data-toggle="datetimepicker">
 												<div class="input-group-text"><i class="fa fa-calendar"></i></div>
 											</div>
 										</div>
-										<div class="input-group date col" id="acat_sabado_termino" data-target-input="nearest">
+										<div class="input-group date col schedule-time" id="acat_sabado_termino" data-target-input="nearest">
 											<input type="text" name="acat_sabado_t" class="form-control datetimepicker-input" data-target="#acat_sabado_termino" value="{{ old('acat_sabado_t') }}"/>
 											<div class="input-group-append" data-target="#acat_sabado_termino" data-toggle="datetimepicker">
 												<div class="input-group-text"><i class="fa fa-calendar"></i></div>
@@ -232,13 +232,13 @@
 										<div class="col-2">
 											<label for="acat_domingo" class="custom-control">Domingo</label>
 										</div>
-										<div class="input-group date col" id="acat_domingo_inicio" data-target-input="nearest">
+										<div class="input-group date col schedule-time" id="acat_domingo_inicio" data-target-input="nearest">
 											<input type="text" name="acat_domingo_i" class="form-control datetimepicker-input" data-target="#acat_domingo_inicio" value="{{ old('acat_domingo_i') }}"/>
 											<div class="input-group-append" data-target="#acat_domingo_inicio" data-toggle="datetimepicker">
 												<div class="input-group-text"><i class="fa fa-calendar"></i></div>
 											</div>
 										</div>
-										<div class="input-group date col" id="acat_domingo_termino" data-target-input="nearest">
+										<div class="input-group date col schedule-time" id="acat_domingo_termino" data-target-input="nearest">
 											<input type="text" name="acat_domingo_t" class="form-control datetimepicker-input" data-target="#acat_domingo_termino" value="{{ old('acat_domingo_t') }}"/>
 											<div class="input-group-append" data-target="#acat_domingo_termino" data-toggle="datetimepicker">
 												<div class="input-group-text"><i class="fa fa-calendar"></i></div>
@@ -282,40 +282,7 @@ $(function () {
 	$('#fecha_producto_a_obra').datetimepicker({format: 'L', locale: 'es'});
 	$('#fecha_producto_a_vivienda').datetimepicker({format: 'L', locale: 'es'});
 
-	$('#acat_lunes_inicio').datetimepicker({format: 'LT'});
-	$('#acat_lunes_termino').datetimepicker({format: 'LT'});
-	$("#acat_lunes_inicio").on("change.datetimepicker", function (e) { $('#acat_lunes_termino').datetimepicker('minDate', e.date); });
-	$("#acat_lunes_termino").on("change.datetimepicker", function (e) { $('#acat_lunes_inicio').datetimepicker('maxDate', e.date); });
-
-	$('#acat_martes_inicio').datetimepicker({format: 'LT'});
-	$('#acat_martes_termino').datetimepicker({format: 'LT'});
-	$("#acat_martes_inicio").on("change.datetimepicker", function (e) { $('#acat_martes_termino').datetimepicker('minDate', e.date); });
-	$("#acat_martes_termino").on("change.datetimepicker", function (e) { $('#acat_martes_inicio').datetimepicker('maxDate', e.date); });
-
-	$('#acat_mier_inicio').datetimepicker({format: 'LT'});
-	$('#acat_mier_termino').datetimepicker({format: 'LT'});
-	$("#acat_mier_inicio").on("change.datetimepicker", function (e) { $('#acat_mier_termino').datetimepicker('minDate', e.date); });
-	$("#acat_mier_termino").on("change.datetimepicker", function (e) { $('#acat_mier_inicio').datetimepicker('maxDate', e.date); });
-
-	$('#acat_jueves_inicio').datetimepicker({format: 'LT'});
-	$('#acat_jueves_termino').datetimepicker({format: 'LT'});
-	$("#acat_jueves_inicio").on("change.datetimepicker", function (e) { $('#acat_jueves_termino').datetimepicker('minDate', e.date); });
-	$("#acat_jueves_termino").on("change.datetimepicker", function (e) { $('#acat_jueves_inicio').datetimepicker('maxDate', e.date); });
-
-	$('#acat_viernes_inicio').datetimepicker({format: 'LT'});
-	$('#acat_viernes_termino').datetimepicker({format: 'LT'});
-	$("#acat_viernes_inicio").on("change.datetimepicker", function (e) { $('#acat_viernes_termino').datetimepicker('minDate', e.date); });
-	$("#acat_viernes_termino").on("change.datetimepicker", function (e) { $('#acat_viernes_inicio').datetimepicker('maxDate', e.date); });
-
-	$('#acat_sabado_inicio').datetimepicker({format: 'LT'});
-	$('#acat_sabado_termino').datetimepicker({format: 'LT'});
-	$("#acat_sabado_inicio").on("change.datetimepicker", function (e) { $('#acat_sabado_termino').datetimepicker('minDate', e.date); });
-	$("#acat_sabado_termino").on("change.datetimepicker", function (e) { $('#acat_sabado_inicio').datetimepicker('maxDate', e.date); });
-
-	$('#acat_domingo_inicio').datetimepicker({format: 'LT'});
-	$('#acat_domingo_termino').datetimepicker({format: 'LT'});
-	$("#acat_domingo_inicio").on("change.datetimepicker", function (e) { $('#acat_domingo_termino').datetimepicker('minDate', e.date); });
-	$("#acat_domingo_termino").on("change.datetimepicker", function (e) { $('#acat_domingo_inicio').datetimepicker('maxDate', e.date); });
+	$('.schedule-time').datetimepicker({format: 'LT', useCurrent: 'hour', stepping: 30});
 });
 </script>
 @endpush

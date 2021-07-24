@@ -15,12 +15,29 @@ class ClienteController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $clientes = Cliente::where('status', 'active')->get();
+        $condominios = Condominio::all();
+        $qry = Cliente::with('condominio', 'user')->where('status', 'active')->latest();
+        if ($request->buscar) {
+            $needle = '%' . escape_like($request->buscar) . '%';
+            $qry->where(fn ($subQry) => 
+                $subQry->orWhere('clientes.nombre', 'LIKE',  $needle)
+                    ->orWhere('clientes.numero_cliente', 'LIKE',  $needle)
+                    ->orWhere('clientes.desarrollador', 'LIKE',  $needle)
+                    ->orWhere('clientes.telefono', 'LIKE',  $needle)
+                    ->orWhereHas('condominio', fn($has) => $has->where('condominios.nombre', 'LIKE',  $needle))
+                    ->orWhereHas('user', fn($has) => $has->where('users.email', 'LIKE',  $needle))
+            );
+        }
+        if ($request->condominio_id) {
+            $qry->where('clientes.condominio_id', $request->condominio_id);
+        }
+        $clientes = $qry->paginate()->appends($request->all());
 
         return view('clientes.index', array(
-            'clientes' => $clientes
+            'clientes' => $clientes,
+            'condominios' => $condominios,
         ));
     }
 
@@ -51,20 +68,14 @@ class ClienteController extends Controller
             "Condominio" => "required|string",
             "Numero_cliente" => "required|string",
             "Nombre_completo" => "required|string",
-            "Coopropietario" => "required|string",
-            "Correo" => "email|required|string",
+            "Coopropietario" => "nullable|string",
+            "Correo" => "required|email|unique:users,email",
             "Telefono" => "required|numeric",
-            "Fecha_escrituracion" => "required|string",
-            "Fecha_poliza" => "required|string",
-            "Fecha_entrega" => "required|string",
-            "Comentarios" => "string"
+            "Fecha_escrituracion" => "required|date_format:d/m/Y",
+            "Fecha_poliza" => "required||date_format:d/m/Y",
+            "Fecha_entrega" => "required||date_format:d/m/Y",
+            "Comentarios" => "nullable|string"
         ]);
-
-        $emailExist = User::where('email', $request->Correo)->first();
-        if ($emailExist) {
-            return back()->withErrors(['Esta cuenta de correo ya fue registrada'])
-                ->withInput(request(['Desarrollador', 'Municipio', 'Condominio', 'Numero_cliente', 'Nombre_completo', 'Coopropietario', 'Correo', 'Telefono', 'Fecha_escrituracion', 'Fecha_poliza', 'Fecha_entrega', 'Comentarios']));
-        }
 
         DB::transaction(function () use ($request) {
             $user = new User();

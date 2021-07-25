@@ -15,4 +15,8 @@ class Coordinador extends Model
     public function agenda_cat() {
         return $this->belongsTo('App\AgendaCat');
     }
+
+    public function tickets() {
+        return $this->hasMany(Ticket::class, 'cat_id');
+    }
 }

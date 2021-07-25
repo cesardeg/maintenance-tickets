@@ -38,7 +38,6 @@ Route::group(['middleware' => ['web', 'auth']], function(){
 });
 //Rutas para actualizacion de un ticket
 Route::delete('tickets/{ticket}', 'TicketController@destroy');
-Route::post('tickets/getTicketValues', 'TicketController@getTicketValues');
 Route::post('tickets/setCat', 'TicketController@asignarCat');
 Route::post('tickets/setCita', 'TicketController@asignarCita');
 Route::post('tickets/setCitaAtencion', 'TicketController@asignarCitaAtencion');

@@ -11,49 +11,55 @@ use App\Encuesta;
 use App\Falla;
 use App\Familia;
 use App\Ticket;
+use App\TicketStatus;
 use App\Ubicacion;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use App\Http\Requests\TicketStore;
 use PDF;
 
 class TicketController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Ticket::class, 'ticket');
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        if (auth()->user()->type == 'cliente') {
-            $tickets = Ticket::where(array(
-                ['cliente_id', auth()->user()->cliente->id],
-                ['estado', '<>', 'Cancelada'],
-            ))->get();
+        $user = auth()->user();
+        $qry = Ticket::with('condominio', 'cliente')->latest();
 
-            $encuesta = Ticket::where('cliente_id', auth()->user()->cliente->id)
-                ->with(['encuestas' => function ($query) {
-                    return $query->where('active', 1);
-                }])->get()->last();
-            if ($encuesta != null and !$encuesta->encuestas->IsEmpty()) {
-                return redirect("/encuesta/" . $encuesta->encuestas->first()->id);
-            }
-        } elseif (auth()->user()->type == 'contratista') {
-            $tickets = Ticket::whereHas('detalle', function (Builder $query) {
-                $query->where('contratista_id', auth()->user()->contratista->id);
-            })->get();
-        } elseif (auth()->user()->type == 'coordinador') {
-            $tickets = Ticket::where(array(
-                ['estado', '<>', 'Cancelada'],
-                ['cat_id', auth()->user()->cat->id],
-            ))->get();
-        } else {
-            $tickets = Ticket::where('estado', '<>', 'Cancelada')->get();
+        if ($user->es_cliente) {
+            $qry->where('cliente_id', $user->cliente->id);
         }
+        if ($user->es_contratista) {
+            $qry->whereHas('detalles', fn($detalle) => $detalle->where('contratista_id', $user->contratista->id));
+        }
+        if ($user->es_cat) {
+            $qry->where('cat_id', $user->cat->id);
+        }
+        if ($request->buscar) {
+            $qry->buscar($request->buscar);
+        }
+        if ($request->estado !== null) {
+            $qry->where('estado', $request->estado);
+        }
+        if ($request->condominio_id) {
+            $qry->where('condominio_id', $request->condominio_id);
+        }
+        $tickets = $qry->paginate()->appends($request->all());
+        $condominios = Condominio::all();
+        $estados = TicketStatus::toArray();
 
-        return view('tickets.index', array(
-            'tickets' => $tickets,
+        return view('tickets.index', compact(
+            'tickets', 'condominios', 'estados'
         ));
     }
 
@@ -64,10 +70,12 @@ class TicketController extends Controller
      */
     public function create()
     {
-        $familias = Familia::get();
-        $clientes = Cliente::get();
-        $ubicaciones = Ubicacion::get();
         $condominios = Condominio::get();
+        $clientes = old('condominio_id')
+            ? Cliente::where('condominio_id', old('condominio_id'))->get()
+            : [];
+        $ubicaciones = Ubicacion::get();
+        $familias = Familia::with('conceptos', 'fallas')->get()->keyBy('id');
 
         return view('tickets.create', array(
             'familias' => $familias,
@@ -77,49 +85,36 @@ class TicketController extends Controller
         ));
     }
 
-    public function getTicketValues(Request $request)
-    {
-        $body = $request->input();
-        $familia = Familia::where('id', $body['id'])->first();
-        return response()->json(array(
-            'conceptos' => $familia->conceptos,
-            'fallas' => $familia->fallas,
-        ));
-    }
-
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\TicketStore  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(TicketStore $request)
     {
         $ticket = new Ticket();
-        if (auth()->user()->type == 'user') {
-            $ticket->cliente_id = $request->Cliente;
+        if ($cliente = auth()->user()->cliente) {
+            $ticket->cliente_id = $cliente->id;
+            $ticket->condominio_id = $cliente->condominio_id;
         } else {
-            $ticket->cliente_id = auth()->user()->cliente->id;
+            $ticket->condominio_id = $request->condominio_id;
+            $ticket->cliente_id = $request->cliente_id;
         }
         $ticket->save();
 
-        for ($i = 0; $i < sizeof($request->Falla); $i++) {
+        $ticket->detalles()->saveMany(array_map(function($data) {
             $detalle = new DetalleTicket();
-            $detalle->ticket_id = $ticket->id;
-            $detalle->familia_id = $request->Familia[$i];
-            $detalle->concepto_id = $request->Concepto[$i];
-            $detalle->falla_id = $request->Falla[$i];
-            $detalle->ubicacion_id = $request->Ubicacion[$i];
-            $detalle->save();
-        }
+            $detalle->familia_id = $data['familia_id'];
+            $detalle->concepto_id = $data['concepto_id'];
+            $detalle->falla_id = $data['falla_id'];
+            $detalle->ubicacion_id = $data['ubicacion_id'];
+            return $detalle;
+        }, $request->detalles));
 
-        $encuesta = new Encuesta();
-        $encuesta->ticket_id = $ticket->id;
-        $encuesta->save();
+        $ticket->encuestas()->saveMany([new Encuesta()]);
 
-        return view('tickets.success', array(
-            'dictamen' => $ticket->id,
-        ));
+        return redirect()->route('tickets.show', $ticket->id);
     }
 
     /**

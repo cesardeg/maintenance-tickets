@@ -10,153 +10,156 @@
 @section('header')
 <!-- Content Header (Page header) -->
 <div class="content-header">
-	<div class="container-fluid">
-		<div class="row mb-2">
-			<div class="col-sm-6">
-				<h1 class="m-0 text-dark">Registrar nuevo Ticket</h1>
-			</div><!-- /.col -->
-			<div class="col-sm-6">
-				<ol class="breadcrumb float-sm-right">
-					@if (auth()->user()->type == 'user')
-					<li class="px-2">
-						<button type="button" class="btn btn-block btn-secondary" data-toggle="modal" data-target="#modal-default">Seleccionar condominio</button>
-					</li>
-					@endif
-					<li class="px-2">
-						<a href="/tickets">
-							<button type="button" class="btn btn-block btn-secondary">Regresar</button>
-						</a>
-					</li>
-				</ol>
-			</div><!-- /.col -->
-		</div><!-- /.row -->
-	</div><!-- /.container-fluid -->
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">Registrar nuevo Ticket</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="px-2">
+                        <a href="/tickets">
+                            <button type="button" class="btn btn-block btn-secondary">Cancelar</button>
+                        </a>
+                    </li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
 </div>
 <!-- /.content-header -->
 @endsection
 
 @section('content')
 <section class="content">
-	<div class="container-fluid">
-		<div class="card card-primary">
-			<div class="card-header">
-				<h3 class="card-title">Registrar ticket de falla</h3>
-			</div>
-			<!-- /.card-header -->
-			<!-- form start -->
-			<form role="form" action="/tickets" method="post">
-			{{ csrf_field() }}
-			<div class="card-body">
-				@if ($errors->any())
-				<div class="alert alert-danger">
-					<ul>
-						@foreach ($errors->all() as $error)
-						<li>{{ $error }}</li>
-						@endforeach
-					</ul>
-				</div>
-				@endif
-				<!-- /.col -->
-				@if (auth()->user()->type == 'user')
-				<div class="row">
-					<div class="col-sm-12">
-						<div class="form-group">
-							<label>Cliente</label>
-							<select id="Clientes" class="form-control select2" name="Cliente" style="width: 100%;">
-								@foreach ($clientes as $cliente)
-								<option value="{{ $cliente->id }}">{{ $cliente->condominio->nombre }} - {{ $cliente->numero_cliente }} / {{ $cliente->nombre }}</option>
-								@endforeach
-							</select>
-						</div>
-						<!-- /.form-group -->
-					</div>
-				</div>
-				@endif
-				<div class="data" id="data">
-					<div class="row" id="master-node" name="master-node">
-						<div class="col-sm-3">
-							<div class="form-group">
-								<label for="Familia[]">Familia</label>
-								<select class="form-control-sm" id="Familia" name="Familia[]" style="width: 100%;" onchange="cambiarOpciones(this)">
-									@foreach ($familias as $familia)
-									<option value="{{ $familia->id }}" {{ old('Familia') == $familia->id ? 'selected' : '' }} >{{ $familia->nombre }}</option>
-									@endforeach
-								</select>
-							</div>
-						</div>
-						<div class="col-sm-3">
-							<div class="form-group">
-								<label for="Concepto[]">Concepto</label>
-								<select id="Conceptos" class="form-control-sm" name="Concepto[]" style="width: 100%;">
-									@foreach ($familias[0]->conceptos as $concepto)
-									<option value="{{ $concepto->id }}" {{ old('Conceptos') == $concepto->id ? 'selected' : '' }} >{{ $concepto->nombre }}</option>
-									@endforeach
-								</select>
-							</div>
-						</div>
-						<div class="col-sm-3">
-							<div class="form-group">
-								<label for="Falla[]">Falla</label>
-								<select id="Fallas" class="form-control-sm" name="Falla[]" style="width: 100%;">
-									@foreach ($familias[0]->fallas as $falla)
-									<option value="{{ $falla->id }}" {{ old('Falla') == $falla->id ? 'selected' : '' }} >{{ $falla->nombre }}</option>
-									@endforeach
-								</select>
-							</div>
-						</div>
-						<div class="col-sm-2">
-							<div class="form-group">
-								<label for="Ubicacion[]">Ubicacion</label>
-								<select id="Ubicacion" class="form-control-sm" name="Ubicacion[]" style="width: 100%;">
-									@foreach ($ubicaciones as $ubicacion)
-									<option value="{{ $ubicacion->id }}" {{ old('Ubicacion') == $ubicacion->id ? 'selected' : '' }} >{{ $ubicacion->nombre }}</option>
-									@endforeach
-								</select>
-							</div>
-						</div>
-						<div class="col-sm-1" style="align-self: center;">
-							<button type="button" onclick="eliminarFalla(this)" class="btn btn-danger"><i class="fas fa-trash-alt"></i></button>
-						</div>
-					</div> <!-- /.row -->
-				</div>
-				<!-- /.card-body -->
-				<div class="card-footer">
-					<button type="button" onclick="agregarFalla()" class="btn btn-primary">Agregar Falla</button>
-					<button type="submit" class="btn btn-success" style="float: right;">Registrar</button>
-				</div>
-			</form>
-		</div>
-	</div>
-	<div class="modal fade" id="modal-default">
-		<div class="modal-dialog">
-			<div class="modal-content bg-default">
-				<div class="modal-header">
-					<h4 class="modal-title">Selecciona un condominio</h4>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">
-					<div class="col-sm-12">
-						<div class="form-group">
-							<label>Condominios</label>
-							<select id="Condominios" class="form-control select2" name="Condominio" style="width: 100%;">
-								@foreach ($condominios as $condominio)
-								<option value="{{ $condominio->id }}">{{ $condominio->nombre }}</option>
-								@endforeach
-							</select>
-						</div>
-					</div>
-				</div>
-				<div class="modal-footer justify-content-between">
-					<button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
-					<button type="button" class="btn btn-primary" onclick="seleccionarCondominio()" data-dismiss="modal">Seleccionar</button>
-				</div>
-			</div>
-			<!-- /.modal-content -->
-		</div>
-		<!-- /.modal-dialog -->
-	</div>
+    <div class="container-fluid">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Registrar ticket de falla</h3>
+            </div>
+            <!-- /.card-header -->
+            <!-- form start -->
+            <form role="form" action="/tickets" method="post">
+            {{ csrf_field() }}
+            <div class="card-body">
+                @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+                <!-- /.col -->
+                @unless (auth()->user()->es_cliente)
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Condominio</label>
+                            <select id="condominio" class="form-control" name="condominio_id" onchange="cambiarClientes(this)">
+                                <option value="" selected>Selecciona condiminio</option>
+                                @foreach ($condominios as $condominio)
+                                <option value="{{ $condominio->id }}" @if(old('condominio_id') == $condominio['id']) selected @endif  }}>
+                                    {{ $condominio->nombre }}
+                                </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Cliente</label>
+                            <select id="cliente" class="form-control select2 w-100" name="cliente_id">
+                                <option value="">Selecciona cliente</option>
+                                @foreach ($clientes as $cliente)
+                                <option value="{{ $cliente->id }}" @if(old('cliente_id') == $cliente['id']) selected @endif>
+                                    {{ $cliente->numero_cliente . ' - ' . $cliente->nombre }}
+                                </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <!-- /.form-group -->
+                    </div>
+                </div>
+                @endunless
+                <div class="data" id="detalles">
+                    @foreach(old('detalles', [[]]) as $i => $detalle)
+                    <div class="row mb-3 border-bottom pb-3" id="detalle-{{ $i }}">
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label for="familia-{{ $i }}">Familia</label>
+                                <select id="familia-{{ $i }}" class="form-control" name="detalles[{{ $i }}][familia_id]" onchange="cambiarOpciones(this, {{ $i }})">
+                                    <option value="">Selecciona familia</option>
+                                    @foreach ($familias as $familia)
+                                    <option value="{{ $familia->id }}" @if(Arr::get($detalle, 'familia_id') == $familia['id']) selected @endif>
+                                        {{ $familia->nombre }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label for="concepto-{{ $i }}">Concepto</label>
+                                <select id="concepto-{{ $i }}" class="form-control" name="detalles[{{ $i }}][concepto_id]">
+                                    <option value="">Selecciona concepto</option>
+                                    @if(Arr::get($detalle, 'familia_id'))
+                                        @foreach ($familias[Arr::get($detalle, 'familia_id')]->conceptos as $concepto)
+                                        <option value="{{ $concepto->id }}" @if(Arr::get($detalle, 'concepto_id') == $concepto['id']) selected @endif>
+                                            {{ $concepto->nombre }}
+                                        </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label for="falla-{{ $i }}">Falla</label>
+                                <select id="falla-{{ $i }}" class="form-control" name="detalles[{{ $i }}][falla_id]">
+                                    <option value="">Selecciona Falla</option>
+                                    @if(Arr::get($detalle, 'familia_id'))
+                                        @foreach ($familias[Arr::get($detalle, 'familia_id')]->fallas as $falla)
+                                        <option value="{{ $falla->id }}" @if(Arr::get($detalle, 'falla_id') == $falla['id']) selected @endif>
+                                            {{ $falla->nombre }}
+                                        </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label for="ubicacion-{{ $i }}">Ubicación</label>
+                                <select id="ubicacion-{{ $i }}" class="form-control" name="detalles[{{ $i }}][ubicacion_id]">
+                                    <option value="">Selecciona Ubicación</option>
+                                    @foreach ($ubicaciones as $ubicacion)
+                                    <option value="{{ $ubicacion->id }}" @if(Arr::get($detalle, 'ubicacion_id') == $ubicacion['id']) selected @endif>
+                                        {{ $ubicacion->nombre }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 text-right">
+                            @unless ($i == 0)
+                            <button type="button" onclick="eliminarFalla(this)" class="btn btn-danger">
+                                Eliminar falla
+                            </button>
+                            @endunless
+                        </div>
+                    </div> <!-- /.row -->
+                    @endforeach
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer">
+                    <button type="button" onclick="agregarFalla()" class="btn btn-info">Agregar Falla</button>
+                    <button type="submit" class="btn btn-primary float-right">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </section>
 @endsection
 
@@ -167,85 +170,119 @@
 $('.select2').select2();
 </script>
 <script type="text/javascript">
-function cambiarOpciones(nodo) {
-	let parent = nodo.parentElement.parentElement.parentElement;
-	let child = parent.childNodes;
-	const selectConceptos = child[3].childNodes[1].childNodes[3];
-	const selectFallas = child[5].childNodes[1].childNodes[3];
+const familias = @json($familias);
+const ubicaciones = @json($ubicaciones);
 
-	for (let i = selectConceptos.options.length; i >= 0; i--) { selectConceptos.remove(i); }
-	for (let i = selectFallas.options.length; i >= 0; i--) { selectFallas.remove(i); }
+function cambiarClientes(element) {
+    const selectClientes = $('#cliente');
+    selectClientes.children('option:gt(0)').remove();
 
-	$.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-	$.ajax({
-		url: '/tickets/getTicketValues',
-		data: { 'id': nodo.value },
-		type: 'POST',
-		success: (response) => {
-			var conceptos = response.conceptos;
-			var fallas = response.fallas;
-
-			conceptos.forEach(concepto => {
-				const option = document.createElement('option');
-				option.value = concepto.id;
-				option.text = concepto.nombre;
-				selectConceptos.appendChild(option);
-			});
-
-			fallas.forEach(falla => {
-				const option = document.createElement('option');
-				option.value = falla.id;
-				option.text = falla.nombre;
-				selectFallas.appendChild(option);
-			});
-		},
-		error: (error) => {
-			console.log('error', error);
-		}
-	});
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
+    $.ajax({
+        url: '/clientes/getClientes',
+        data: { 'condominio_id': element.value },
+        type: 'POST',
+        success: (response) => {
+            var clientes = response.clientes;
+            selectClientes.append(
+                clientes.map((cliente) => $('<option />', { value: cliente.id }).text(cliente.numero_cliente + " - " +  cliente.nombre))
+            );
+        },
+        error: (error) => {
+            console.log('error', error);
+        }
+    });
 }
 
-function seleccionarCondominio() {
-	const selectCondominios = document.querySelector('#Condominios');
-	const selectClientes = document.querySelector('#Clientes');
+function cambiarOpciones(nodo, index) {
+    const selectConceptos = $('#concepto-' + index);
+    const selectFallas = $('#falla-' + index);
+    selectConceptos.children('option:gt(0)').remove();
+    selectFallas.children('option:gt(0)').remove();
 
-	for (let i = selectClientes.options.length; i >= 0; i--) { selectClientes.remove(i); }
+    const familia = familias[nodo.value];
+    if (!familia) {
+        return;
+    }
 
-	$.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-	$.ajax({
-		url: '/clientes/getClientes',
-		data: { 'condominio_id': selectCondominios.value },
-		type: 'POST',
-		success: (response) => {
-			var clientes = response.clientes;
-			clientes.forEach(cliente => {
-				const option = document.createElement('option');
-				option.value = cliente.id;
-				option.text = cliente.nombre_condominio + " - " + cliente.numero_cliente + " / " +  cliente.nombre;
-				selectClientes.appendChild(option);
-			});
-		},
-		error: (error) => {
-			console.log('error', error);
-		}
-	});
+    selectConceptos.append(
+        familia.conceptos.map((concepto) => $('<option />', { value: concepto.id }).text(concepto.nombre))
+    );
+    selectFallas.append(
+        familia.fallas.map((falla) => $('<option />', { value: falla.id }).text(falla.nombre))
+    );
 }
 
 function agregarFalla() {
-	let data = document.querySelector("#data");
-	let master_node = document.querySelector("#master-node");
-	let copy_node = master_node.cloneNode(true);
-	data.appendChild(copy_node);
+    let list = $("#detalles");
+    let index = new Date().getTime();
+    let node = $('<div />', {'class': 'row mb-3 pb-3 border-bottom', id: 'detalle-' + index}).append([
+        $('<div />', {'class': 'col-sm-3'}).append(
+            $('<div />', {'class': 'form-group'}).append([
+                $('<label />', {for: 'familia-' + index}).text('Familia'),
+                $('<select />', {
+                    id: 'familia-' + index,
+                    'class': 'form-control',
+                    name: 'detalles[' + index + '][familia_id]',
+                    onchange: 'cambiarOpciones(this, ' + index +')',
+                }).append([
+                    $('<option />', {value: '', selected: true}).text('Selecciona familia')
+                ].concat(
+                    Object.values(familias).map((familia) => $('<option />', {
+                        value: familia.id,
+                    }).text(familia.nombre))
+                ))
+            ])
+        ),
+        $('<div />', {'class': 'col-sm-3'}).append(
+            $('<div />', {'class': 'form-group'}).append([
+                $('<label />', {for: 'concepto-' + index}).text('Concepto'),
+                $('<select />', {
+                    id: 'concepto-' + index,
+                    'class': 'form-control',
+                    name: 'detalles[' + index + '][concepto_id]',
+                }).append([
+                    $('<option />', {value: '', selected: true}).text('Selecciona concepto')
+                ])
+            ])
+        ),
+        $('<div />', {'class': 'col-sm-3'}).append(
+            $('<div />', {'class': 'form-group'}).append([
+                $('<label />', {for: 'falla-' + index}).text('Falla'),
+                $('<select />', {
+                    id: 'falla-' + index,
+                    'class': 'form-control',
+                    name: 'detalles[' + index + '][falla_id]',
+                }).append([
+                    $('<option />', {value: '', selected: true}).text('Selecciona Falla')
+                ])
+            ])
+        ),
+        $('<div />', {'class': 'col-sm-3'}).append(
+            $('<div />', {'class': 'form-group'}).append([
+                $('<label />', {for: 'ubicacion-' + index}).text('Ubicación'),
+                $('<select />', {
+                    id: 'ubicacion-' + index,
+                    'class': 'form-control',
+                    name: 'detalles[' + index + '][ubicacion_id]',
+                }).append([
+                    $('<option />', {value: '', selected: true}).text('Selecciona Ubicación')
+                ].concat(
+                    ubicaciones.map((ubicacion) => $('<option />', {
+                        value: ubicacion.id,
+                    }).text(ubicacion.nombre))
+                ))
+            ])
+        ),
+        $('<div />', {'class': 'col-sm-12 text-right'}).append(
+            $('<button />', { 'class': 'btn btn-danger',  type: 'button', onclick: 'eliminarFalla(this)' }).text('Eliminar falla')
+        ),
+    ]);
+    list.append(node);
 }
 
 function eliminarFalla(nodo) {
-	let master_node = document.getElementsByName("master-node");
-	if (master_node.length <= 1) {
-		toastr.warning('No puedes eliminar esta falla.');
-	} else {
-		let parent = nodo.parentElement.parentElement;
-		parent.remove();
-	}
+    $(nodo).closest('.row').remove();
 }
 </script>
 @endpush

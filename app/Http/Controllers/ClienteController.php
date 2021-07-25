@@ -20,15 +20,7 @@ class ClienteController extends Controller
         $condominios = Condominio::all();
         $qry = Cliente::with('condominio', 'user')->where('status', 'active')->latest();
         if ($request->buscar) {
-            $needle = '%' . escape_like($request->buscar) . '%';
-            $qry->where(fn ($subQry) => 
-                $subQry->orWhere('clientes.nombre', 'LIKE',  $needle)
-                    ->orWhere('clientes.numero_cliente', 'LIKE',  $needle)
-                    ->orWhere('clientes.desarrollador', 'LIKE',  $needle)
-                    ->orWhere('clientes.telefono', 'LIKE',  $needle)
-                    ->orWhereHas('condominio', fn($has) => $has->where('condominios.nombre', 'LIKE',  $needle))
-                    ->orWhereHas('user', fn($has) => $has->where('users.email', 'LIKE',  $needle))
-            );
+            $qry->buscar($request->buscar);
         }
         if ($request->condominio_id) {
             $qry->where('clientes.condominio_id', $request->condominio_id);

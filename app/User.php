@@ -44,11 +44,31 @@ class User extends Authenticatable
         return $this->hasOne('App\Cliente', 'user_id', 'id');
     }
 
+    public function cat() {
+        return $this->hasOne('App\Coordinador', 'user_id', 'id');
+    }
+
     public function contratista() {
         return $this->hasOne('App\Contratista', 'user_id', 'id');
     }
 
-    public function cat() {
-        return $this->hasOne('App\Coordinador', 'user_id', 'id');
+    public function getEsClienteAttribute()
+    {
+        return $this->type === 'cliente' && $this->cliente !== null;
+    }
+
+    public function getEsCoordinadorAttribute()
+    {
+        return $this->type === 'coordinador' && $this->cat !== null;
+    }
+
+    public function getEsContratistaAttribute()
+    {
+        return $this->type === 'contratista' && $this->contratista !== null;
+    }
+
+    public function getEsAdminAttribute()
+    {
+        return $this->type === 'user';
     }
 }

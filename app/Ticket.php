@@ -3,27 +3,98 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Ticket extends Model
 {
+    use SoftDeletes;
+
     //Relationships
+    public function condominio() {
+        return $this->belongsTo(Condominio::class);
+    }
+
     public function cliente() {
-        return $this->hasOne('App\Cliente', 'id', 'cliente_id');
+        return $this->belongsTo(Cliente::class);
     }
 
     public function coordinador() {
-        return $this->hasOne('App\Coordinador', 'id', 'cat_id');
+        return $this->belongsTo(Coordinador::class, 'cat_id');
     }
 
-    public function contratista() {
-        return $this->hasOne('App\Contratista', 'id', 'contratista_id');
-    }
+    public function contratistas() {
+        return $this->belongsToMany(Contratista::class, 'detalle_tickets');
+    }    
 
-    public function detalle() {
-        return $this->hasMany('App\DetalleTicket');
+    public function detalles() {
+        return $this->hasMany(DetalleTicket::class);
     }
 
     public function encuestas() {
-        return $this->hasMany('App\Encuesta');
+        return $this->hasMany(Encuesta::class);
+    }
+
+    // scopes
+    public function scopeBuscar($qry, $text = '')
+    {
+        $escaped = escape_like($text);
+        $pattern = "%{$escaped}%";
+        return $qry->where(fn ($where) => 
+            $where->orWhere('tickets.id', $escaped)
+                ->orWhereHas('condominio', fn($has) => $has->where('condominios.nombre', 'LIKE',  $pattern))
+                ->orWhereHas('cliente', fn($has) => $has->where('clientes.nombre', 'LIKE',  $pattern)->orWhere('clientes.numero_cliente', 'LIKE',  $pattern))
+                ->orWhereHas('coordinador', fn($has) => $has->where('cat.nombre', 'LIKE',  $pattern))
+                ->orWhereHas('contratistas', fn($has) => $has->where('contratistas.nombre', 'LIKE',  $pattern))
+        );
+    }
+    
+    // getters
+    public function getNombreEstadoAttribute()
+    {
+        return TicketStatus::getName($this->estado);
+    }
+}
+
+abstract class TicketStatus {
+    const PENDING = 0;
+    const APPRAISING = 1;
+    const NOT_APPLICABLE = 2;
+    const IN_PROGRESS = 3;
+    const FINISHED = 4;
+    const RATED = 5;
+
+    public static function getName($status)
+    {
+        if ($status === self::PENDING) {
+            return 'Pendiente';
+        }
+        if ($status === self::APPRAISING) {
+            return 'En valoración';
+        }
+        if ($status === self::NOT_APPLICABLE) {
+            return 'No procede';
+        }
+        if ($status === self::IN_PROGRESS) {
+            return 'En progreso';
+        }
+        if ($status === self::FINISHED) {
+            return 'Terminada';
+        }
+        if ($status === self::RATED) {
+            return 'Valorada';
+        }
+        return 'Desconocido';
+    }
+
+    public static function toArray()
+    {
+        return [
+            self::PENDING => self::getName(self::PENDING),
+            self::APPRAISING => self::getName(self::APPRAISING),
+            self::NOT_APPLICABLE => self::getName(self::NOT_APPLICABLE),
+            self::IN_PROGRESS => self::getName(self::IN_PROGRESS),
+            self::FINISHED => self::getName(self::FINISHED),
+            self::RATED => self::getName(self::RATED),
+        ];
     }
 }

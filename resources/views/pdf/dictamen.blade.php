@@ -63,7 +63,7 @@
                 </td>
             </tr>
 
-            @foreach ($ticket->detalle as $key => $detalle)
+            @foreach ($ticket->detalles as $key => $detalle)
                 <tr>
                     <td colspan="3" class="text-center">
                         FALLA NO.{{ $key + 1 }}

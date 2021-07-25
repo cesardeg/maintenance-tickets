@@ -104,7 +104,7 @@
                     </thead>
                     <tbody>
 
-                    @foreach ($ticket->detalle as $key => $detalle)
+                    @foreach ($ticket->detalles as $key => $detalle)
                     <tr>
                         <td>{{ $key + 1 }}</td>
                         <td>{{ $detalle->familia->nombre }}</td>

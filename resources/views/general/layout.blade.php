@@ -8,6 +8,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
 	<!-- Font Awesome Icons -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5/main.min.css">
 	<link rel="stylesheet" href="{{ url('/plugins/fontawesome-free/css/all.min.css') }}">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
   <!-- overlayScrollbars -->
@@ -29,6 +30,14 @@
 
 	<!-- Content Wrapper. Contains page content -->
 	<div class="content-wrapper">
+
+		@if (session()->has('message'))
+		<div class="container">
+			<div class="alert alert-success">
+				{{ session('message') }}
+			</div>
+		</div>
+		@endif
 
 		@section('header')
 		@show

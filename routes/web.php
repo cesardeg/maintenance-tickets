@@ -20,6 +20,7 @@ Route::group(['middleware' => ['web', 'auth']], function(){
 
     Route::resource('clientes', 'ClienteController');
     Route::resource('contratistas', 'ContratistaController');
+    Route::get('cat/schedule', 'CoordinadorController@schedule')->name('cat.schedule.index');
     Route::resource('cat', 'CoordinadorController');
 
     Route::resource('tickets', 'TicketController');
@@ -38,8 +39,7 @@ Route::group(['middleware' => ['web', 'auth']], function(){
 });
 //Rutas para actualizacion de un ticket
 Route::delete('tickets/{ticket}', 'TicketController@destroy');
-Route::post('tickets/setCat', 'TicketController@asignarCat');
-Route::post('tickets/setCita', 'TicketController@asignarCita');
+Route::post('tickets/{ticket}/asignarCat', 'TicketController@asignarCat')->name('tickets.add-cat');
 Route::post('tickets/setCitaAtencion', 'TicketController@asignarCitaAtencion');
 Route::post('tickets/setFechaReporte', 'TicketController@asignarFechaReporte');
 Route::post('tickets/setPrototipo', 'TicketController@asignarPrototipo');
@@ -52,6 +52,7 @@ Route::post('detallesTicket/setCont', 'DetalleTicketController@asignarContratist
 Route::post('detallesTicket/setObservacion', 'DetalleTicketController@asignarObservacion');
 Route::post('detallesTicket/setUbicacion', 'DetalleTicketController@asignarUbicacion');
 Route::post('detallesTicket/cambiarCliente', 'DetalleTicketController@cambiarCliente');
+Route::post('detallesTicket/{detalleTicket}/valorar', 'DetalleTicketController@detalle')->name('detalles-ticket.valorar');
 //Ruta para generar pdf del dictamen
 Route::get('generarDictamen/{id}', 'TicketController@genaratePDF');
 //Rutas para obtener datos de las estadisticas

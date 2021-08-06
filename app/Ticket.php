@@ -9,6 +9,13 @@ class Ticket extends Model
 {
     use SoftDeletes;
 
+    /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = ['cita_cat', 'cita_cat_fin'];
+
     //Relationships
     public function condominio() {
         return $this->belongsTo(Condominio::class);

@@ -93,9 +93,9 @@
 							</div>
 						</div>
 						<div class="col-sm-6">
-							<label for="Cat_asignado">Agenda disponible de coordinador de atención técnica para valoraciones</label>
+							<label for="Cat_asignado">Agenda disponibilidad para valoraciones</label>
 							<div class="form-group">
-								<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-acat">Asignar</button>
+								<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-acat">Editar agenda</button>
 							</div>
 						</div>
 					</div> <!-- /.row -->
@@ -105,7 +105,7 @@
 						<div class="modal-dialog modal-lg">
 							<div class="modal-content bg-default">
 								<div class="modal-header">
-									<h4 class="modal-title">Asignar agenda disponible de coordinador de atención técnica para valoraciones</h4>
+									<h4 class="modal-title">Agenda disponibilidad para valoraciones</h4>
 									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 										<span aria-hidden="true">&times;</span>
 									</button>
@@ -249,7 +249,7 @@
 								</div>
 								<div class="modal-footer justify-content-left">
 									<!-- <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cerrar</button> -->
-									<button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Asignar</button>
+									<button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Listo</button>
 								</div>
 							</div>
 							<!-- /.modal-content -->
@@ -279,10 +279,7 @@ $(document).ready(function () {
 	bsCustomFileInput.init();
 });
 $(function () {
-	$('#fecha_producto_a_obra').datetimepicker({format: 'L', locale: 'es'});
-	$('#fecha_producto_a_vivienda').datetimepicker({format: 'L', locale: 'es'});
-
-	$('.schedule-time').datetimepicker({format: 'LT', useCurrent: 'hour', stepping: 30});
+	$('.schedule-time').datetimepicker({format: 'HH:mm', useCurrent: 'hour', stepping: 30});
 });
 </script>
 @endpush

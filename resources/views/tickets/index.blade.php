@@ -19,7 +19,7 @@
 					@can('create', App\Ticket::class)
 					<li class="breadcrumb-item">
 						<a href="{{ route('tickets.create') }}">
-							<button type="button" class="btn btn-block btn-primary">Alta de ticket</button>
+							<button type="button" class="btn btn-block btn-primary">Crear ticket</button>
 						</a>
 					</li>
 					@endcan
@@ -100,7 +100,7 @@
 							@unless ( auth()->user()->es_coordinador )
 							<th>CAT</th>
 							@endunless
-							<th>Fecha de alta</th>
+							<th>Fecha de reporte</th>
 							<th>Estado</th>
 							<th style="width: 100px;"></th>
 						</tr>

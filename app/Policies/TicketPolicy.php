@@ -14,7 +14,7 @@ class TicketPolicy
      * Determine whether the user can view any tickets.
      *
      * @param  \App\User  $user
-     * @return mixed
+     * @return bool
      */
     public function viewAny(User $user)
     {
@@ -26,7 +26,7 @@ class TicketPolicy
      *
      * @param  \App\User  $user
      * @param  \App\Ticket  $ticket
-     * @return mixed
+     * @return bool
      */
     public function view(User $user, Ticket $ticket)
     {
@@ -49,7 +49,7 @@ class TicketPolicy
      * Determine whether the user can create tickets.
      *
      * @param  \App\User  $user
-     * @return mixed
+     * @return bool
      */
     public function create(User $user)
     {
@@ -61,7 +61,7 @@ class TicketPolicy
      *
      * @param  \App\User  $user
      * @param  \App\Ticket  $ticket
-     * @return mixed
+     * @return bool
      */
     public function update(User $user, Ticket $ticket)
     {
@@ -82,7 +82,7 @@ class TicketPolicy
      *
      * @param  \App\User  $user
      * @param  \App\Ticket  $ticket
-     * @return mixed
+     * @return bool
      */
     public function delete(User $user, Ticket $ticket)
     {
@@ -94,7 +94,7 @@ class TicketPolicy
      *
      * @param  \App\User  $user
      * @param  \App\Ticket  $ticket
-     * @return mixed
+     * @return bool
      */
     public function restore(User $user, Ticket $ticket)
     {
@@ -106,9 +106,21 @@ class TicketPolicy
      *
      * @param  \App\User  $user
      * @param  \App\Ticket  $ticket
-     * @return mixed
+     * @return bool
      */
     public function forceDelete(User $user, Ticket $ticket)
+    {
+        return $user->es_admin;
+    }
+
+    /**
+     * Determine whether the user can asign a coordinator to the ticket.
+     *
+     * @param  \App\User  $user
+     * @param  \App\Ticket  $ticket
+     * @return bool
+     */
+    public function asignarCat(User $user, Ticket $ticket)
     {
         return $user->es_admin;
     }

@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Http\Requests\TicketStore;
+use App\Http\Requests\TicketCoordinadorUpdate;
 use PDF;
 
 class TicketController extends Controller
@@ -125,7 +126,8 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket)
     {
-        $coordinadores = Coordinador::with('user')->get();
+        $ticket->load('coordinador', 'detalles', 'detalles.ticket');
+        $coordinadores = Coordinador::with('user', 'agenda_cat')->get();
         $contratistas = Contratista::with('user')->get();
         $ubicaciones = Ubicacion::all();
         $clientes = Cliente::all();
@@ -187,26 +189,17 @@ class TicketController extends Controller
             ->with('message', 'Se ha actualizado el ticket correctamente');
     }
 
-    public function asignarCat(Request $request)
+    public function asignarCat(TicketCoordinadorUpdate $request, Ticket $ticket)
     {
-
-        $body = $request->input();
-        $catSeleccionado = $body['catSeleccionado'];
-
-        if ($catSeleccionado != 'none') {
-
-            $ticket = Ticket::findOrFail($body['id']);
-            $ticket->cat_id = $catSeleccionado;
-            $ticket->save();
-
-            $mensaje = 'CAT asignado correctamente.';
-        } else {
-            $mensaje = 'No hay CAT seleccionado.';
+        $this->authorize('asignarCat', $ticket);
+        $ticket->cat_id = $request->cat_id;
+        $ticket->cita_cat = $request->cita_cat;
+        $ticket->cita_cat_fin = $request->cita_cat_fin;
+        if ($ticket->estado < TicketStatus::APPRAISING) {
+            $ticket->estado = TicketStatus::APPRAISING;
         }
-
-        return response()->json(array(
-            'mensaje' => $mensaje,
-        ));
+        $ticket->save();
+        return redirect()->route('tickets.show', $ticket->id)->with('message', 'Coordinador asignado correctamente!');
     }
 
     public function asignarPrototipo(Request $request)

@@ -60,6 +60,12 @@
             {!! $errors->first('password', '<span class="invalid-feedback">:message</span>') !!}
           </div>
         </div>
+        <div class="form-group form-check">
+          <input class="form-check-input" type="checkbox" value="1" id="remember" name="remember">
+          <label class="form-check-label" for="remember">
+            Recuerdame
+          </label>
+        </div>
         <div class="row">
           <div class="col-12">
             <button type="submit" class="btn btn-primary btn-block">Iniciar sesión</button>

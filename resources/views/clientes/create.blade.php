@@ -162,18 +162,8 @@ $(document).ready(function () {
 	bsCustomFileInput.init();
 });
 $(function () {
-	$('#fecha_escrituracion').datetimepicker({
-		format: 'L',
-		locale: 'es'
-	});
-
-	$('#fecha_poliza').datetimepicker({
-		format: 'L',
-		locale: 'es'
-	});
-
-	$('#fecha_entrega').datetimepicker({
-		format: 'L',
+	$('#fecha_escrituracion, #fecha_poliza, #fecha_entrega').datetimepicker({
+		format: 'YYYY-MM-DD',
 		locale: 'es'
 	});
 });

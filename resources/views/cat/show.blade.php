@@ -11,7 +11,7 @@
 	<div class="container-fluid">
 		<div class="row mb-2">
 			<div class="col-sm-6">
-				<h1 class="m-0 text-dark">Coordinador de atencion tecnica {{ $cat->nombre }}</h1>
+				<h1 class="m-0 text-dark">Detalle de Coordinador de atención técnica</h1>
 			</div><!-- /.col -->
 			<div class="col-sm-6">
 				<ol class="breadcrumb float-sm-right">
@@ -33,7 +33,7 @@
 	<div class="container-fluid">
 		<div class="card card-primary">
 			<div class="card-header">
-				<h3 class="card-title">Datos del coordinador de atencion tecnica</h3>
+				<h3 class="card-title">Datos generales</h3>
 			</div>
 			<!-- /.card-header -->
 			<div class="card-body">
@@ -90,7 +90,7 @@
 						</div>
 					</div>
 					<div class="col-sm-6">
-						<label for="Cat_asignado">Agenda disponible de coordinador de atención técnica para valoraciones</label>
+						<label for="Cat_asignado">Agenda disponibilidad para valoraciones</label>
 						<div class="form-group">
 							<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-acat">Ver agenda</button>
 						</div>
@@ -102,14 +102,13 @@
 					<div class="modal-dialog modal-lg">
 						<div class="modal-content bg-default">
 							<div class="modal-header">
-								<h4 class="modal-title">Agenda disponible de coordinador de atención técnica para valoraciones</h4>
+								<h4 class="modal-title">Agenda disponibilidad para valoraciones</h4>
 								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 									<span aria-hidden="true">&times;</span>
 								</button>
 							</div>
 							<div class="modal-body">
-								
-							@if (  $cat->agenda_cat->lunes_i != null )
+								@if ($cat->agenda_cat->lunes_i != null)
 								<!-- Lunes -->
 								<div class="row justify-content-center" style="margin: 5px;">
 									<p>Lunes de {{ $cat->agenda_cat->lunes_i }} a {{ $cat->agenda_cat->lunes_t }}</p>
@@ -158,6 +157,12 @@
 								</div>
 								@endif
 
+								@unless($cat->has_schedule)
+								<div class="row justify-content-center" style="margin: 5px;">
+									<p class="text-muted">No hay una agenda registrada</p>
+								</div>
+								@endunless
+
 							</div>
 							<div class="modal-footer justify-content-left">
 								<button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cerrar</button>
@@ -175,7 +180,7 @@
 				<a href="/cat/{{ $cat->id }}/edit">
 					<button type="submit" class="btn btn-primary">Editar</button>
 				</a>
-				<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modal-danger">Eliminar</button>
+				<button type="submit" class="btn btn-danger" data-toggle="modal" data-target="#modal-danger">Eliminar</button>
 			</div>
 		</div>
 	</div>

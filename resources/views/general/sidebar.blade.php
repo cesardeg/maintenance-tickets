@@ -41,7 +41,7 @@
 					<a href="/cat" class="nav-link" id="cat">
 						<i class="nav-icon fas fa-user-shield fa-fw"></i>
 						<p>
-							CAT
+							Coordinadores
 						</p>
 					</a>
 				</li>

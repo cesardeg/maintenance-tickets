@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Coordinador;
 use App\AgendaCat;
 use App\User;
-use Illuminate\Support\Facades\DB;
+use App\Ticket;
+use App\Http\Requests\CoordinadorStore;
 
 class CoordinadorController extends Controller
 {
@@ -40,24 +42,8 @@ class CoordinadorController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CoordinadorStore $request)
     {
-        $validator = $this->validate($request, [
-            "Desarrollador" => "required|string",
-            "Municipio" => "required|string",
-            "Proyecto" => "required|string",
-            "Numero_cat" => "required|integer",
-            "Nombre_cat" => "required|string",
-            "Correo" => "email|required|string",
-            "Telefono" => "required|numeric",
-        ]);
-
-        $emailExist = User::where('email', $request->Correo)->first();
-        if ($emailExist) {
-            return back()->withErrors(['Esta cuenta de correo ya fue registrada'])
-                ->withInput(request(['Desarrollador', 'Municipio', 'Proyecto', 'Numero_cat', 'Nombre_cat', 'Correo', 'Telefono']));
-        }
-
         DB::transaction(function () use ($request) {
             $user = new User();
             $user->email = $request->Correo;
@@ -74,8 +60,8 @@ class CoordinadorController extends Controller
             $cat->save();
         });
 
-        return redirect('/cat')
-                    ->with('message', 'Se ha registrado al CAT correctamente');
+        return redirect()->route('cat.show', $cat->id)
+            ->with('message', 'Se ha registrado al CAT correctamente');
     }
 
     /**
@@ -113,30 +99,14 @@ class CoordinadorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(CoordinadorStore $request, $id)
     {
-        $cat = Coordinador::findOrFail($id);
-        $user = User::findOrFail($cat->user_id);
+        $cat = Coordinador::with('user')->findOrFail($id);
+        $user = $cat->user;
 
-        $validator = $this->validate($request, [
-            "Desarrollador" => "required|string",
-            "Municipio" => "required|string",
-            "Proyecto" => "required|string",
-            "Numero_cat" => "required|integer",
-            "Nombre_cat" => "required|string",
-            "Correo" => "email|required|string",
-            "Telefono" => "required|numeric",
-        ]);
-
-        if ($request->Correo != $cat->user->email) {
-            $emailExist = User::where('email', $request->Correo)->first();
-            if ($emailExist) {
-                return back()->withErrors(['Esta cuenta de correo ya fue registrada'])
-                    ->withInput(request(['Desarrollador', 'Municipio', 'Proyecto', 'Numero_cat', 'Nombre_cat', 'Correo', 'Telefono']));
-            } else {
-                $user->email = $request->Correo;
-                $user->update();
-            }
+        if ($request->Correo !== $user->email) {
+            $user->email = $request->Correo;
+            $user->update();
         }
 
         $agenda_cat = AgendaCat::findOrFail($cat->agenda_cat_id);
@@ -146,7 +116,7 @@ class CoordinadorController extends Controller
         $cat = self::coordinador($cat, $user, $agenda_cat, $request);
         $cat->update();
 
-        return redirect('/cat')
+        return redirect()->route('cat.show', $cat->id)
                     ->with('message', 'Se ha actualizado al CAT correctamente');
     }
 
@@ -198,5 +168,22 @@ class CoordinadorController extends Controller
         $agenda_cat->domingo_t = $request->acat_domingo_t;
 
         return $agenda_cat;
+    }
+
+    public function schedule(Request $request)
+    {
+        $tickets = Ticket::where('cat_id', $request->cat_id)
+            ->where('cita_cat', '>=', $request->start)
+            ->where('cita_cat', '<=', $request->end)
+            ->get();
+
+        $data = $tickets->map(fn($tiket) => [
+            'id' => $tiket->id,
+            'title' => "#{$tiket->id}",
+            'start' => $tiket->cita_cat,
+            'end' => $tiket->cita_cat_fin,
+        ]);
+
+        return response()->json($data);
     }
 }

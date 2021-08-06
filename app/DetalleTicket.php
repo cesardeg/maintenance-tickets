@@ -35,4 +35,9 @@ class DetalleTicket extends Model
     public function ubicacion() {
         return $this->belongsTo('App\Ubicacion');
     }
+
+    public function toString()
+    {
+        return "{$this->concepto->nombre} - {$this->falla->nombre}";
+    }
 }

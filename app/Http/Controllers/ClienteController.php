@@ -63,9 +63,9 @@ class ClienteController extends Controller
             "Coopropietario" => "nullable|string",
             "Correo" => "required|email|unique:users,email",
             "Telefono" => "required|numeric",
-            "Fecha_escrituracion" => "required|date_format:d/m/Y",
-            "Fecha_poliza" => "required||date_format:d/m/Y",
-            "Fecha_entrega" => "required||date_format:d/m/Y",
+            "Fecha_escrituracion" => "required|date_format:Y-m-d",
+            "Fecha_poliza" => "required||date_format:Y-m-d",
+            "Fecha_entrega" => "required||date_format:Y-m-d",
             "Comentarios" => "nullable|string"
         ]);
 

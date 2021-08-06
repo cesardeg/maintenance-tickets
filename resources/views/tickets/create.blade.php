@@ -13,15 +13,17 @@
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0 text-dark">Registrar nuevo Ticket</h1>
+                <h1 class="m-0 text-dark">Crear Ticket</h1>
             </div><!-- /.col -->
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
+                    @can('viewAny', 'App\Ticket')
                     <li class="px-2">
-                        <a href="/tickets">
+                        <a href="{{ route('tickets.index') }}">
                             <button type="button" class="btn btn-block btn-secondary">Cancelar</button>
                         </a>
                     </li>
+                    @endcan
                 </ol>
             </div><!-- /.col -->
         </div><!-- /.row -->
@@ -58,7 +60,7 @@
                         <div class="form-group">
                             <label>Condominio</label>
                             <select id="condominio" class="form-control" name="condominio_id" onchange="cambiarClientes(this)">
-                                <option value="" selected>Selecciona condiminio</option>
+                                <option value="" selected disabled>Selecciona condominio...</option>
                                 @foreach ($condominios as $condominio)
                                 <option value="{{ $condominio->id }}" @if(old('condominio_id') == $condominio['id']) selected @endif  }}>
                                     {{ $condominio->nombre }}
@@ -71,7 +73,7 @@
                         <div class="form-group">
                             <label>Cliente</label>
                             <select id="cliente" class="form-control select2 w-100" name="cliente_id">
-                                <option value="">Selecciona cliente</option>
+                                <option value="" selected disabled>Selecciona cliente...</option>
                                 @foreach ($clientes as $cliente)
                                 <option value="{{ $cliente->id }}" @if(old('cliente_id') == $cliente['id']) selected @endif>
                                     {{ $cliente->numero_cliente . ' - ' . $cliente->nombre }}
@@ -85,12 +87,12 @@
                 @endunless
                 <div class="data" id="detalles">
                     @foreach(old('detalles', [[]]) as $i => $detalle)
-                    <div class="row mb-3 border-bottom pb-3" id="detalle-{{ $i }}">
+                    <div class="row mt-3 pt-3 border-top" id="detalle-{{ $i }}">
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label for="familia-{{ $i }}">Familia</label>
                                 <select id="familia-{{ $i }}" class="form-control" name="detalles[{{ $i }}][familia_id]" onchange="cambiarOpciones(this, {{ $i }})">
-                                    <option value="">Selecciona familia</option>
+                                    <option value="" selected disabled>Selecciona familia...</option>
                                     @foreach ($familias as $familia)
                                     <option value="{{ $familia->id }}" @if(Arr::get($detalle, 'familia_id') == $familia['id']) selected @endif>
                                         {{ $familia->nombre }}
@@ -103,7 +105,7 @@
                             <div class="form-group">
                                 <label for="concepto-{{ $i }}">Concepto</label>
                                 <select id="concepto-{{ $i }}" class="form-control" name="detalles[{{ $i }}][concepto_id]">
-                                    <option value="">Selecciona concepto</option>
+                                    <option value="" selected disabled>Selecciona concepto...</option>
                                     @if(Arr::get($detalle, 'familia_id'))
                                         @foreach ($familias[Arr::get($detalle, 'familia_id')]->conceptos as $concepto)
                                         <option value="{{ $concepto->id }}" @if(Arr::get($detalle, 'concepto_id') == $concepto['id']) selected @endif>
@@ -118,7 +120,7 @@
                             <div class="form-group">
                                 <label for="falla-{{ $i }}">Falla</label>
                                 <select id="falla-{{ $i }}" class="form-control" name="detalles[{{ $i }}][falla_id]">
-                                    <option value="">Selecciona Falla</option>
+                                    <option value="" selected disabled>Selecciona falla...</option>
                                     @if(Arr::get($detalle, 'familia_id'))
                                         @foreach ($familias[Arr::get($detalle, 'familia_id')]->fallas as $falla)
                                         <option value="{{ $falla->id }}" @if(Arr::get($detalle, 'falla_id') == $falla['id']) selected @endif>
@@ -133,7 +135,7 @@
                             <div class="form-group">
                                 <label for="ubicacion-{{ $i }}">Ubicación</label>
                                 <select id="ubicacion-{{ $i }}" class="form-control" name="detalles[{{ $i }}][ubicacion_id]">
-                                    <option value="">Selecciona Ubicación</option>
+                                    <option value="" selected disabled>Selecciona ubicación...</option>
                                     @foreach ($ubicaciones as $ubicacion)
                                     <option value="{{ $ubicacion->id }}" @if(Arr::get($detalle, 'ubicacion_id') == $ubicacion['id']) selected @endif>
                                         {{ $ubicacion->nombre }}
@@ -143,7 +145,7 @@
                             </div>
                         </div>
                         <div class="col-sm-12 text-right">
-                            @unless ($i == 0)
+                            @unless ($loop->first)
                             <button type="button" onclick="eliminarFalla(this)" class="btn btn-danger">
                                 Eliminar falla
                             </button>
@@ -153,7 +155,7 @@
                     @endforeach
                 </div>
                 <!-- /.card-body -->
-                <div class="card-footer">
+                <div class="card-footer mt-3">
                     <button type="button" onclick="agregarFalla()" class="btn btn-info">Agregar Falla</button>
                     <button type="submit" class="btn btn-primary float-right">Guardar</button>
                 </div>
@@ -216,7 +218,7 @@ function cambiarOpciones(nodo, index) {
 function agregarFalla() {
     let list = $("#detalles");
     let index = new Date().getTime();
-    let node = $('<div />', {'class': 'row mb-3 pb-3 border-bottom', id: 'detalle-' + index}).append([
+    let node = $('<div />', {'class': 'row mt-3 pt-3 border-top', id: 'detalle-' + index}).append([
         $('<div />', {'class': 'col-sm-3'}).append(
             $('<div />', {'class': 'form-group'}).append([
                 $('<label />', {for: 'familia-' + index}).text('Familia'),
@@ -226,7 +228,7 @@ function agregarFalla() {
                     name: 'detalles[' + index + '][familia_id]',
                     onchange: 'cambiarOpciones(this, ' + index +')',
                 }).append([
-                    $('<option />', {value: '', selected: true}).text('Selecciona familia')
+                    $('<option />', {value: '', selected: true}).text('Selecciona familia...')
                 ].concat(
                     Object.values(familias).map((familia) => $('<option />', {
                         value: familia.id,
@@ -242,7 +244,7 @@ function agregarFalla() {
                     'class': 'form-control',
                     name: 'detalles[' + index + '][concepto_id]',
                 }).append([
-                    $('<option />', {value: '', selected: true}).text('Selecciona concepto')
+                    $('<option />', {value: '', selected: true}).text('Selecciona concepto...')
                 ])
             ])
         ),
@@ -254,7 +256,7 @@ function agregarFalla() {
                     'class': 'form-control',
                     name: 'detalles[' + index + '][falla_id]',
                 }).append([
-                    $('<option />', {value: '', selected: true}).text('Selecciona Falla')
+                    $('<option />', {value: '', selected: true}).text('Selecciona falla...')
                 ])
             ])
         ),
@@ -266,7 +268,7 @@ function agregarFalla() {
                     'class': 'form-control',
                     name: 'detalles[' + index + '][ubicacion_id]',
                 }).append([
-                    $('<option />', {value: '', selected: true}).text('Selecciona Ubicación')
+                    $('<option />', {value: '', selected: true}).text('Selecciona ubicación...')
                 ].concat(
                     ubicaciones.map((ubicacion) => $('<option />', {
                         value: ubicacion.id,

@@ -45,21 +45,21 @@
             </tr>
             <tr>
                 <td>
-                    FECHA REPORTE: <br> {{ date('d/m/y h:i A', strtotime($ticket->created_at)) }}
+                    PROTOTIPO: <br> {{ $ticket->prototipo ?? 'N/D' }}
                 </td>
                 <td>
-                    FECHA DE VISITA DE CAT: <br> {{ $ticket->cita_cat }}
+                    FECHA REPORTE: <br> {{ $ticket->created_at?->format('d/m/Y H:i') }}
                 </td>
                 <td>
-                    FECHA POLIZA: <br> {{ $ticket->cliente->fecha_poliza }}
+                    FECHA POLIZA: <br> {{ $ticket->cliente->fecha_poliza?->format('d/m/Y') }}
                 </td>
             </tr>
             <tr>
                 <td colspan="2">
-                    FECHAS PROGRAMADAS DE ATENCIÓN: <br> {{ is_null($ticket->cita_atencion_1) ? "" : date('d/m/y h:i A', strtotime($ticket->cita_atencion_1)) }}{{ is_null($ticket->cita_atencion_2) ? "" : ", " .  date('d/m/y h:i A', strtotime($ticket->cita_atencion_2)) }}{{ is_null($ticket->cita_atencion_3) ? "" : ", " . date('d/m/y h:i A', strtotime($ticket->cita_atencion_3)) }}
+                    COORDINADOR DE ATENCIÓN TÉCNICA (CAT): <br> {{ $ticket->coordinador?->nombre ?? 'Pendiente de asignación' }}
                 </td>
                 <td>
-                    PROTOTIPO: <br> {{ $ticket->prototipo }}
+                    FECHA VISITA CAT: <br> {{ $ticket->cita_cat?->format('d/m/Y H:i') ?? 'No disponible' }}
                 </td>
             </tr>
 
@@ -74,39 +74,50 @@
                         FAMILIA: <br> {{ $detalle->familia->nombre}}
                     </td>
                     <td>
-                        COMPONENTES: <br> {{ $detalle->concepto->nombre}}
+                        COMPONENTES: <br> {{ $detalle->concepto?->nombre}}
                     </td>
                     <td>
-                        Tipo de falla: <br> {{ $detalle->falla->nombre}}
+                        Tipo de falla: <br> {{ $detalle->falla?->nombre}}
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        UBICACIÓN: <br> {{ $detalle->ubicacion_id != null  ? $detalle->ubicacion->nombre : 'Sin ubicacion' }}
+                        UBICACIÓN: <br> {{ $detalle->ubicacion?->nombre }}
+                    </td>
+
+                    <td>
+                        PROCEDE: <br> {{ $detalle->valoracion }}
                     </td>
                     <td>
-                        CONTRATISTA: <br> {{ $detalle->contratista_id != null ? $detalle->contratista->nombre : 'Sin asignar'}}
-                    </td>
-                    <td>
-                        PROCEDE: <br> {{ $detalle->valoracion}}
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="3">
                         OBSERVACIONES <br> {{ $detalle->observacion }}
                     </td>
                 </tr>
+                @foreach($detalle->manpowers as $manpower)
+                <tr>
+                    <td>
+                        CONTRATISTA: <br> {{ $manpower->contratista?->nombre }}
+                    </td>
+
+                    <td>
+                        FECHA DE TRABAJO PROGRAMADA: <br> {{ $manpower->agendado_desde?->format('d/m/Y H:i') }}
+                    </td>
+
+                    <td>
+                        FECHA DE ATENCIÓN: <br> {{ $manpower->trabajado_desde?->format('d/m/Y H:i') ?? 'N/D' }}
+                    </td>
+                </tr>
+                @endforeach
             @endforeach
             <tr>
                 <td colspan="2" class="mt-5">
-                    ______________________________
+                    ______________________________________
                     <br>
-                    NOMBRE Y FIRMA DE EL CLIENTE
+                    NOMBRE Y FIRMA DEL CLIENTE
                 </td>
                 <td colspan="2" class="mt-5">
-                    __________________________________
+                    ______________________________________
                     <br>
-                    NOMBRE Y FIRMA DE TECNICO TRAZO
+                    NOMBRE Y FIRMA DEL TÉCNICO DE TRAZO
                 </td>
             </tr>
         </table>

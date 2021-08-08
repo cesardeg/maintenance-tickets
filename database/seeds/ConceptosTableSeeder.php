@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use App\Concepto;
-use App\Familia;
+use App\Models\Concepto;
+use App\Models\Familia;
 
 class ConceptosTableSeeder extends Seeder
 {

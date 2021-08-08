@@ -31,7 +31,7 @@
 @section('content')
 <section class="content">
 	<div class="container-fluid">
-		<div class="card card-primary">
+		<div class="card">
 			<div class="card-header">
 				<h3 class="card-title">Modifique los datos</h3>
 			</div>
@@ -87,16 +87,16 @@
 								<input type="text" class="form-control" name="Correo" placeholder="Correo" value="{{ old('Correo', $cat->user->email) }}">
 							</div>
 						</div>
-            <div class="col-sm-6">
+            			<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Telefono">Teléfono</label>
 								<input type="text" class="form-control" name="Telefono" placeholder="Teléfono" value="{{ old('Telefono', $cat->telefono) }}">
 							</div>
 						</div>
 						<div class="col-sm-6">
-							<label for="Cat_asignado">Agenda disponibilidad para valoraciones</label>
+							<label for="Cat_asignado">Horario de disponibilidad para valoraciones</label>
 							<div class="form-group">
-								<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-acat">Editar agenda</button>
+								<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-acat">Editar horario</button>
 							</div>
 						</div>
 					</div> <!-- /.row -->
@@ -106,13 +106,13 @@
 						<div class="modal-dialog modal-lg">
 							<div class="modal-content bg-default">
 								<div class="modal-header">
-									<h4 class="modal-title">Agenda disponibilidad para valoraciones</h4>
+									<h4 class="modal-title">Horario de disponibilidad para valoraciones</h4>
 									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 										<span aria-hidden="true">&times;</span>
 									</button>
 								</div>
 								<div class="modal-body">
-									<p>Selecciona los días de agenda disponible</p>
+									<p>Selecciona los días y horarios disponibles</p>
 
 									<!-- Lunes -->
 									<div class="row" style="margin: 5px;">
@@ -259,7 +259,7 @@
 					</div>
 					<!-- /.modal -->
 
-
+				</div>
 				<!-- /.card-body -->
 				<div class="card-footer">
 					<button type="submit" class="btn btn-success">Guardar cambios</button>

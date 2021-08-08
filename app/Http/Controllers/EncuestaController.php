@@ -3,28 +3,42 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Encuesta;
+use Illuminate\Support\Facades\DB;
+use App\Models\Encuesta;
+use App\Models\Ticket;
+use App\Models\TicketStatus;
+use App\Http\Requests\EncuestaStore;
 
 class EncuestaController extends Controller
 {
-    public function store(Request $request, $encuesta_id)
+    public function store(EncuestaStore $request, Encuesta $encuesta)
     {
-        $encuesta = Encuesta::findOrFail($encuesta_id);
+        $this->authorize('contestar', $encuesta);
+        $ticket = Ticket::findOrFail($encuesta->ticket_id);
+
+        DB::beginTransaction();
+
         $encuesta->pregunta_1 = $request->pregunta_1;
         $encuesta->pregunta_2 = $request->pregunta_2;
         $encuesta->pregunta_3 = $request->pregunta_3;
         $encuesta->pregunta_4 = $request->pregunta_4;
         $encuesta->pregunta_5 = $request->pregunta_5;
-        $encuesta->active = false;
+        $encuesta->active = true;
         $encuesta->save();
 
-        return redirect('/tickets')
-                    ->with('message', 'Se ha registrado la encuesta correctamente');
+        $ticket->estado = TicketStatus::RATED;
+        $ticket->save();
+
+        DB::commit();
+
+        return redirect()
+            ->route('tickets.index', $encuesta->ticket_id)
+            ->with('message', 'Se ha registrado la encuesta correctamente');
     }
 
-    public function show($encuesta_id)
+    public function show(Encuesta $encuesta)
     {
-        $encuesta = Encuesta::findOrFail($encuesta_id);
+        $this->authorize('view', $encuesta);
 
         return view('encuesta.show', array(
             'encuesta' => $encuesta,

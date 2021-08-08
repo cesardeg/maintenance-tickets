@@ -16,7 +16,7 @@
 			</div><!-- /.col -->
 			<div class="col-sm-6">
 				<ol class="breadcrumb float-sm-right">
-					@can('create', App\Ticket::class)
+					@can('create', 'App\Models\Ticket')
 					<li class="breadcrumb-item">
 						<a href="{{ route('tickets.create') }}">
 							<button type="button" class="btn btn-block btn-primary">Crear ticket</button>
@@ -26,11 +26,6 @@
 				</ol>
 			</div><!-- /.col -->
 		</div><!-- /.row -->
-		@if (session()->has('message'))
-		<div class="alert alert-info">
-			{{ session('message') }}
-		</div>
-		@endif
 		@if ($errors->any())
 		<div class="alert alert-danger">
 			<ul>
@@ -118,7 +113,7 @@
 							@unless ( auth()->user()->es_coordinador )
 							<td>{{ $ticket->coordinador?->nombre ?? 'Sin asignar' }}</td>
 							@endunless
-							<td>{{ $ticket->created_at->format('d-m-Y') }}</td>
+							<td>{{ $ticket->created_at->format('d/m/Y') }}</td>
 							<td>{{ $ticket->nombre_estado }}</td>
 							<td>
 								<a class="btn btn-info" href="{{ route('tickets.show', $ticket->id) }}">

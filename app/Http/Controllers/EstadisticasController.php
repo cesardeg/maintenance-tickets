@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 use Carbon\Carbon;
 use DB;
-use App\Contratista;
+use App\Models\Contratista;
 
 use Illuminate\Http\Request;
 
@@ -15,12 +15,13 @@ class EstadisticasController extends Controller
         $endDay = Carbon::now();
 
         $data = DB::select(
-            "select proyecto, count(*) as total from tickets
-            inner join (select id, proyecto from clientes group by proyecto) cl
-            on tickets.cliente_id = cl.id
+            "select condominios.nombre as proyecto, count(*) as total from tickets
+            inner join clientes cl
+            inner join condominios
+            on cl.condominio_id = condominios.id
             where date(tickets.created_at) >= ?
             and date(tickets.created_at) <= ?
-            group by proyecto;",
+            group by condominios.nombre;",
             [$startDay->format('Y/m/d'), $endDay->format('Y/m/d')]
         );
 

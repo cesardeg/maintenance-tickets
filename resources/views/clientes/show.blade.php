@@ -29,7 +29,7 @@
 @section('content')
 <section class="content">
 	<div class="container-fluid">
-		<div class="card card-primary">
+		<div class="card">
 			<div class="card-header">
 				<h3 class="card-title">Datos del cliente</h3>
 				<!-- card tools -->
@@ -94,19 +94,22 @@
 					<div class="col-sm-6">
 						<div class="form-group">
 							<label for="Fecha_escrituracion" >Fecha de escrituración</label>
-							<input type="text" class="form-control" name="Fecha_escrituracion" value="{{ $cliente->fecha_escrituracion }}" disabled>
+							<input type="text" class="form-control" name="Fecha_escrituracion"
+								value="{{ $cliente->fecha_escrituracion?->format('d/m/Y') }}" disabled>
 						</div>
 					</div>
 					<div class="col-sm-6">
 						<div class="form-group">
 							<label for="Fecha_poliza" >Fecha de póliza de garantía</label>
-							<input type="text" class="form-control" name="Fecha_poliza" value="{{ $cliente->fecha_poliza }}" disabled>
+							<input type="text" class="form-control" name="Fecha_poliza"
+								value="{{ $cliente->fecha_poliza?->format('d/m/Y') }}" disabled>
 						</div>
 					</div>
 					<div class="col-sm-6">
 						<div class="form-group">
 							<label for="Fecha_entrega" >Fecha de entrega</label>
-							<input type="text" class="form-control" name="Fecha_entrega" value="{{ $cliente->fecha_entrega }}" disabled>
+							<input type="text" class="form-control" name="Fecha_entrega"
+								value="{{ $cliente->fecha_entrega?->format('d/m/Y') }}" disabled>
 						</div>
 					</div>
 					<div class="col-sm-12">
@@ -116,6 +119,7 @@
 						</div>
 					</div>
 				</div> <!-- /.row -->
+			</div>
 			<!-- /.card-body -->
 			<div class="card-footer">
 				<a href="/clientes/{{ $cliente->id }}/edit">
@@ -144,17 +148,21 @@
 				<tr>
 					<th>#</th>
 					<th>Estado</th>
-					<th>Fecha</th>
+					<th>Fecha de reporte</th>
 					<th style="width: 150px;"></th>
 				</tr>
 				</thead>
 				<tbody>
-				@foreach ($tickets as $key => $ticket)
+				@foreach ($tickets as $ticket)
 				<tr>
-					<td>{{ $key + 1 }}</td>
-					<td>{{ $ticket->estado }}</td>
+					<td>{{ $ticket->id }}</td>
+					<td>{{ $ticket->nombre_estado }}</td>
 					<td>{{ date('Y-m-d', strtotime($ticket->created_at)) }}</td>
-					<td><a target="_blank" href="/tickets/{{ $ticket->id }}"><button type="button" class="btn btn-block btn-info">Ver ticket</button></a></td>
+					<td>
+						<a class="btn btn-info" target="_blank" href="{{ route('tickets.show', $ticket->id) }}">
+							Ver ticket
+						</a>
+					</td>
 				</tr>
 				@endforeach
 				</tbody>

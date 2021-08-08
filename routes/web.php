@@ -20,15 +20,17 @@ Route::group(['middleware' => ['web', 'auth']], function(){
 
     Route::resource('clientes', 'ClienteController');
     Route::resource('contratistas', 'ContratistaController');
-    Route::get('cat/schedule', 'CoordinadorController@schedule')->name('cat.schedule.index');
     Route::resource('cat', 'CoordinadorController');
 
     Route::resource('tickets', 'TicketController');
 
+    Route::put('manpowers/{manpower}/log', 'ManpowerController@registrarTrabajo')->name('manpowers.log');
+    Route::delete('manpowers/{manpower}', 'ManpowerController@destroy')->name('manpowers.destroy');
+
     Route::resource('condominios', 'CondominioController');
     //Rutas de las encuestas
-    Route::get('encuesta/{id}', 'EncuestaController@show');
-    Route::post('encuesta/{id}', 'EncuestaController@store');
+    Route::get('encuestas/{encuesta}', 'EncuestaController@show')->name('encuestas.show');
+    Route::post('encuestas/{encuesta}', 'EncuestaController@store')->name('encuestas.contestar');
 
     //Rutas de las vistas de las estadisticas
     Route::get('estadistica-proyectos', 'EstadisticasController@vistaProyectos');
@@ -36,25 +38,17 @@ Route::group(['middleware' => ['web', 'auth']], function(){
     Route::get('estadistica-valoracion', 'EstadisticasController@vistaValoracion');
     Route::get('estadistica-solucion', 'EstadisticasController@vistaSolucion');
     Route::get('estadistica-satisfaccion', 'EstadisticasController@vistaSatisfaccion');
+
+    Route::get('schedules/coordinador', 'ScheduleControler@coordinador')->name('schedules.coordinador');
+    Route::get('schedules/contratista', 'ScheduleControler@contratista')->name('schedules.contratista');
 });
 //Rutas para actualizacion de un ticket
-Route::delete('tickets/{ticket}', 'TicketController@destroy');
 Route::post('tickets/{ticket}/asignarCat', 'TicketController@asignarCat')->name('tickets.add-cat');
-Route::post('tickets/setCitaAtencion', 'TicketController@asignarCitaAtencion');
-Route::post('tickets/setFechaReporte', 'TicketController@asignarFechaReporte');
-Route::post('tickets/setPrototipo', 'TicketController@asignarPrototipo');
-//Rutas para actualizacion de los detalles de un ticket
-/* Route::get('detallesTicket/status/{ticket_id}', 'DetalleTicketController@checkStatus'); */
-Route::post('detallesTicket/detalle', 'DetalleTicketController@detalle');
-Route::post('detallesTicket/changeValoracion', 'DetalleTicketController@cambiarValoracion');
-Route::post('detallesTicket/changeEstado', 'DetalleTicketController@cambiarEstado');
-Route::post('detallesTicket/setCont', 'DetalleTicketController@asignarContratista');
-Route::post('detallesTicket/setObservacion', 'DetalleTicketController@asignarObservacion');
-Route::post('detallesTicket/setUbicacion', 'DetalleTicketController@asignarUbicacion');
-Route::post('detallesTicket/cambiarCliente', 'DetalleTicketController@cambiarCliente');
-Route::post('detallesTicket/{detalleTicket}/valorar', 'DetalleTicketController@detalle')->name('detalles-ticket.valorar');
+Route::post('detallesTicket/{detalle}/valorar', 'DetalleTicketController@valorar')->name('detalles-ticket.valorar');
+Route::post('detallesTicket/{detalle}/contratistas', 'DetalleTicketController@asignarContratista')->name('detalles-ticket.contratistas.store');
 //Ruta para generar pdf del dictamen
-Route::get('generarDictamen/{id}', 'TicketController@genaratePDF');
+Route::get('tickets/{ticket}/pdf', 'TicketController@genaratePDF')->name('tickets.showPDF');
+
 //Rutas para obtener datos de las estadisticas
 Route::get('estadistica-proyectos/getData', 'EstadisticasController@dataProyectos');
 Route::get('estadistica-contratista/getData', 'EstadisticasController@dataContratista');

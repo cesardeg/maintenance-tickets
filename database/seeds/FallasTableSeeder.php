@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use App\Falla;
-use App\Familia;
+use App\Models\Falla;
+use App\Models\Familia;
 
 class FallasTableSeeder extends Seeder
 {

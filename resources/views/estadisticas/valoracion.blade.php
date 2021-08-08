@@ -34,7 +34,7 @@
 @section('content')
 <section class="content">
 	<div class="container-fluid">
-		<div class="card card-primary">
+		<div class="card">
 			<div class="card-header">
 				<h3 class="card-title">Estadistícas por tiempo de valoración</h3>
             </div>

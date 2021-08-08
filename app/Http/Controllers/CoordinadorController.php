@@ -4,14 +4,24 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Coordinador;
-use App\AgendaCat;
-use App\User;
-use App\Ticket;
+use App\Models\Coordinador;
+use App\Models\AgendaCat;
+use App\Models\User;
+use App\Models\Ticket;
 use App\Http\Requests\CoordinadorStore;
 
 class CoordinadorController extends Controller
 {
+    /**
+     * Create the controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->authorizeResource(Coordinador::class, 'cat');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -70,9 +80,8 @@ class CoordinadorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Coordinador $cat)
     {
-        $cat = Coordinador::findOrFail($id);
         return view('cat.show', array(
             'cat' => $cat
         ));
@@ -84,9 +93,8 @@ class CoordinadorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Coordinador $cat)
     {
-        $cat = Coordinador::findOrFail($id);
         return view('cat.edit', array(
             'cat' => $cat
         ));
@@ -99,9 +107,8 @@ class CoordinadorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(CoordinadorStore $request, $id)
+    public function update(CoordinadorStore $request, Coordinador $cat)
     {
-        $cat = Coordinador::with('user')->findOrFail($id);
         $user = $cat->user;
 
         if ($request->Correo !== $user->email) {
@@ -126,9 +133,8 @@ class CoordinadorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Coordinador $cat)
     {
-        $cat = Coordinador::findOrFail($id);
         $cat->status = 'inactive';
         $cat->save();
 
@@ -168,22 +174,5 @@ class CoordinadorController extends Controller
         $agenda_cat->domingo_t = $request->acat_domingo_t;
 
         return $agenda_cat;
-    }
-
-    public function schedule(Request $request)
-    {
-        $tickets = Ticket::where('cat_id', $request->cat_id)
-            ->where('cita_cat', '>=', $request->start)
-            ->where('cita_cat', '<=', $request->end)
-            ->get();
-
-        $data = $tickets->map(fn($tiket) => [
-            'id' => $tiket->id,
-            'title' => "#{$tiket->id}",
-            'start' => $tiket->cita_cat,
-            'end' => $tiket->cita_cat_fin,
-        ]);
-
-        return response()->json($data);
     }
 }

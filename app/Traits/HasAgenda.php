@@ -1,44 +1,9 @@
 <?php
 
-namespace App;
+namespace App\Traits;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Coordinador extends Model
+trait HasAgenda
 {
-    protected $table = 'cat';
-
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array
-     */
-    protected $appends = ['working_hours'];
-
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = ['agenda_cat'];
-
-    public function user() {
-        return $this->belongsTo('App\User');
-    }
-
-    public function agenda_cat() {
-        return $this->belongsTo('App\AgendaCat');
-    }
-
-    public function tickets() {
-        return $this->hasMany(Ticket::class, 'cat_id');
-    }
-
-    public function getAgendaAttribute()
-    {
-        return $this->agenda_cat;
-    }
-
     public function getHasScheduleAttribute()
     {
         return !!$this->agenda && !!(

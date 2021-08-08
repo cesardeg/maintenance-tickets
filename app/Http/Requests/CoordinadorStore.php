@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\User;
+use App\Models\User;
 
 class CoordinadorStore extends FormRequest
 {
@@ -24,7 +24,10 @@ class CoordinadorStore extends FormRequest
      */
     public function rules()
     {
-        $user = User::whereHas('cat', fn($cat) => $cat->whereId($this->route('cat')))->first();
+        $user = $this->route('contratista')
+            ? User::whereHas('contratista', fn($cnt) => $cnt->whereId($this->route('contratista')))->first()
+            : null;
+    
         return [
             "Desarrollador"    => "required|string",
             "Municipio"        => "required|string",
@@ -58,22 +61,22 @@ class CoordinadorStore extends FormRequest
     public function attributes()
     {
         return [
-            'Numero_cat' => 'Número de CAT',
-            'Telefono' => 'Teléfono',
-            'acat_lunes_i' => 'Horario inicio Lunes',
-            'acat_lunes_t' => 'Horario fin Lunes',
-            'acat_martes_i' => 'Horario inicio Martes',
-            'acat_martes_t' => 'Horario fin Martes',
+            'Numero_cat'      => 'Número de CAT',
+            'Telefono'        => 'Teléfono',
+            'acat_lunes_i'     => 'Horario inicio Lunes',
+            'acat_lunes_t'     => 'Horario fin Lunes',
+            'acat_martes_i'    => 'Horario inicio Martes',
+            'acat_martes_t'    => 'Horario fin Martes',
             'acat_miercoles_i' => 'Horario inicio Miércoles',
             'acat_miercoles_t' => 'Horario fin Miércoles',
-            'acat_jueves_i' => 'Horario inicio Jueves',
-            'acat_jueves_t' => 'Horario fin Jueves',
-            'acat_viernes_i' => 'Horario inicio Viernes',
-            'acat_viernes_t' => 'Horario fin Viernes',
-            'acat_sabado_i' => 'Horario inicio Sábado',
-            'acat_sabado_t' => 'Horario fin Sábado',
-            'acat_domingo_i' => 'Horario inicio Domingo',
-            'acat_domingo_t' => 'Horario fin Domingo',
+            'acat_jueves_i'    => 'Horario inicio Jueves',
+            'acat_jueves_t'    => 'Horario fin Jueves',
+            'acat_viernes_i'   => 'Horario inicio Viernes',
+            'acat_viernes_t'   => 'Horario fin Viernes',
+            'acat_sabado_i'    => 'Horario inicio Sábado',
+            'acat_sabado_t'    => 'Horario fin Sábado',
+            'acat_domingo_i'   => 'Horario inicio Domingo',
+            'acat_domingo_t'   => 'Horario fin Domingo',
         ];
     }
 }

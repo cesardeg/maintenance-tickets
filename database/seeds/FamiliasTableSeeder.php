@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use App\Familia;
+use App\Models\Familia;
 
 class FamiliasTableSeeder extends Seeder
 {

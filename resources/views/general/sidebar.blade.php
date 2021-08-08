@@ -39,7 +39,7 @@
 				</li>
 				<li class="nav-item">
 					<a href="/cat" class="nav-link" id="cat">
-						<i class="nav-icon fas fa-user-shield fa-fw"></i>
+						<i class="nav-icon fas fa-user-check fa-fw"></i>
 						<p>
 							Coordinadores
 						</p>
@@ -57,7 +57,7 @@
 					<a href="/tickets" class="nav-link" id="tickets">
 						<i class="nav-icon fas fa-ticket-alt fa-fw"></i>
 						<p>
-							Ticket
+							Tickets
 						</p>
 					</a>
 				</li>
@@ -124,7 +124,7 @@
 					<a href="/tickets" class="nav-link" id="tickets">
 						<i class="nav-icon fas fa-ticket-alt"></i>
 						<p>
-							Ticket
+							Tickets
 						</p>
 					</a>
 				</li>

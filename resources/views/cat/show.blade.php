@@ -31,7 +31,7 @@
 @section('content')
 <section class="content">
 	<div class="container-fluid">
-		<div class="card card-primary">
+		<div class="card">
 			<div class="card-header">
 				<h3 class="card-title">Datos generales</h3>
 			</div>
@@ -90,9 +90,9 @@
 						</div>
 					</div>
 					<div class="col-sm-6">
-						<label for="Cat_asignado">Agenda disponibilidad para valoraciones</label>
+						<label for="Cat_asignado">Horario de disponibilidad para valoraciones</label>
 						<div class="form-group">
-							<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-acat">Ver agenda</button>
+							<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-acat">Ver horario</button>
 						</div>
 					</div>
 				</div> <!-- /.row -->
@@ -102,7 +102,7 @@
 					<div class="modal-dialog modal-lg">
 						<div class="modal-content bg-default">
 							<div class="modal-header">
-								<h4 class="modal-title">Agenda disponibilidad para valoraciones</h4>
+								<h4 class="modal-title">Horario de disponibilidad para valoraciones</h4>
 								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 									<span aria-hidden="true">&times;</span>
 								</button>
@@ -159,14 +159,13 @@
 
 								@unless($cat->has_schedule)
 								<div class="row justify-content-center" style="margin: 5px;">
-									<p class="text-muted">No hay una agenda registrada</p>
+									<p class="text-muted">No hay horario registrado</p>
 								</div>
 								@endunless
 
 							</div>
 							<div class="modal-footer justify-content-left">
 								<button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cerrar</button>
-								<!-- <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Asignar</button> -->
 							</div>
 						</div>
 						<!-- /.modal-content -->
@@ -174,7 +173,7 @@
 					<!-- /.modal-dialog -->
 				</div>
 				<!-- /.modal -->
-
+			</div>
 			<!-- /.card-body -->
 			<div class="card-footer">
 				<a href="/cat/{{ $cat->id }}/edit">

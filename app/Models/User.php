@@ -1,12 +1,12 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-use App\Cliente;
+use App\Models\Cliente;
 
 class User extends Authenticatable
 {
@@ -40,16 +40,19 @@ class User extends Authenticatable
     ];
 
     //Relationships
-    public function cliente() {
-        return $this->hasOne('App\Cliente', 'user_id', 'id');
+    public function cliente()
+    {
+        return $this->hasOne(Cliente::class, 'user_id', 'id');
     }
 
-    public function cat() {
-        return $this->hasOne('App\Coordinador', 'user_id', 'id');
+    public function cat()
+    {
+        return $this->hasOne(Coordinador::class, 'user_id', 'id');
     }
 
-    public function contratista() {
-        return $this->hasOne('App\Contratista', 'user_id', 'id');
+    public function contratista()
+    {
+        return $this->hasOne(Contratista::class, 'user_id', 'id');
     }
 
     public function getEsClienteAttribute()

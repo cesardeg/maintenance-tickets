@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,29 +17,46 @@ class Ticket extends Model
     protected $dates = ['cita_cat', 'cita_cat_fin'];
 
     //Relationships
-    public function condominio() {
+    public function condominio()
+    {
         return $this->belongsTo(Condominio::class);
     }
 
-    public function cliente() {
+    public function cliente()
+    {
         return $this->belongsTo(Cliente::class);
     }
 
-    public function coordinador() {
+    public function coordinador()
+    {
         return $this->belongsTo(Coordinador::class, 'cat_id');
     }
 
-    public function contratistas() {
+    public function contratistas()
+    {
         return $this->belongsToMany(Contratista::class, 'detalle_tickets');
     }    
 
-    public function detalles() {
+    public function detalles()
+    {
         return $this->hasMany(DetalleTicket::class);
     }
 
-    public function encuestas() {
+    public function manpowers()
+    {
+        return $this->hasManyThrough(Manpower::class, DetalleTicket::class, 'ticket_id', 'detalle_id');
+    }
+
+    public function encuestas()
+    {
         return $this->hasMany(Encuesta::class);
     }
+
+    public function encuesta()
+    {
+        return $this->hasOne(Encuesta::class)->latest();
+    }
+
 
     // scopes
     public function scopeBuscar($qry, $text = '')
@@ -59,6 +76,21 @@ class Ticket extends Model
     public function getNombreEstadoAttribute()
     {
         return TicketStatus::getName($this->estado);
+    }
+
+    public function getNoFinalizadoAttribute()
+    {
+        return $this->estado < TicketStatus::FINISHED;
+    }
+
+    public function getFinalizadoAttribute()
+    {
+        return $this->estado == TicketStatus::FINISHED;
+    }
+
+    public function getRatedAttribute()
+    {
+        return $this->estado == TicketStatus::RATED;
     }
 }
 

@@ -39,8 +39,8 @@ class TicketCoordinadorUpdate extends FormRequest
     {
         return [
             'cat_id' => 'Coordinador de atención técnica (CAT)',
-            'cita_cat' => 'Fecha de inicio cita',
-            'cita_cat_fin' => 'Fecha de fin cita',
+            'cita_cat' => 'Fecha de inicio cita CAT',
+            'cita_cat_fin' => 'Fecha de fin cita CAT',
         ];
     }
 }

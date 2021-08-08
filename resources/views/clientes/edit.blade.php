@@ -31,7 +31,7 @@
 @section('content')
 <section class="content">
 	<div class="container-fluid">
-		<div class="card card-primary">
+		<div class="card">
 			<div class="card-header">
 				<h3 class="card-title">Modifique los datos</h3>
 			</div>
@@ -143,6 +143,7 @@
 							</div>
 						</div>
 					</div> <!-- /.row -->
+				</div>
 				<!-- /.card-body -->
 				<div class="card-footer">
 					<button type="submit" class="btn btn-success">Guardar cambios</button>
@@ -163,18 +164,8 @@ $(document).ready(function () {
 	bsCustomFileInput.init();
 });
 $(function () {
-	$('#fecha_escrituracion').datetimepicker({
-		format: 'L',
-		locale: 'es'
-	});
-
-	$('#fecha_poliza').datetimepicker({
-		format: 'L',
-		locale: 'es'
-	});
-
-	$('#fecha_entrega').datetimepicker({
-		format: 'L',
+	$('#fecha_escrituracion, #fecha_poliza, #fecha_entrega').datetimepicker({
+		format: 'YYYY-mm-DD',
 		locale: 'es'
 	});
 });

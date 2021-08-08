@@ -26,6 +26,8 @@ class TicketStore extends FormRequest
         $rules = [
             'condominio_id' => 'required|exists:condominios,id',
             'cliente_id' => "required|exists:clientes,id,condominio_id,{$this->condominio_id}",
+            'created_at' => "nullable|date_format:Y-m-d H:i:s",
+            'prototipo' => 'nullable|string',
             'detalles' => 'required|array|min:1',
             'detalles.*.familia_id' => 'required|exists:familias,id',
             'detalles.*.concepto_id' => 'required|exists:conceptos,id',

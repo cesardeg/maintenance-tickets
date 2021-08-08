@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Cliente;
-use App\Condominio;
-use App\Contratista;
-use App\Coordinador;
-use App\DetalleTicket;
-use App\Encuesta;
-use App\Falla;
-use App\Familia;
-use App\Ticket;
-use App\TicketStatus;
-use App\Ubicacion;
+use App\Models\Cliente;
+use App\Models\Condominio;
+use App\Models\Contratista;
+use App\Models\Coordinador;
+use App\Models\DetalleTicket;
+use App\Models\Encuesta;
+use App\Models\Falla;
+use App\Models\Familia;
+use App\Models\Ticket;
+use App\Models\TicketStatus;
+use App\Models\Ubicacion;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -41,9 +41,9 @@ class TicketController extends Controller
             $qry->where('cliente_id', $user->cliente->id);
         }
         if ($user->es_contratista) {
-            $qry->whereHas('detalles', fn($detalle) => $detalle->where('contratista_id', $user->contratista->id));
+            $qry->whereHas('manpowers', fn($power) => $power->where('manpowers.contratista_id', $user->contratista->id));
         }
-        if ($user->es_cat) {
+        if ($user->es_coordinador) {
             $qry->where('cat_id', $user->cat->id);
         }
         if ($request->buscar) {
@@ -101,6 +101,8 @@ class TicketController extends Controller
         } else {
             $ticket->condominio_id = $request->condominio_id;
             $ticket->cliente_id = $request->cliente_id;
+            $ticket->created_at = $request->created_at;
+            $ticket->prototipo = $request->prototipo;
         }
         $ticket->save();
 
@@ -121,19 +123,18 @@ class TicketController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Ticket  $ticket
+     * @param  \App\Models\Ticket  $ticket
      * @return \Illuminate\Http\Response
      */
     public function show(Ticket $ticket)
     {
         $ticket->load('coordinador', 'detalles', 'detalles.ticket');
         $coordinadores = Coordinador::with('user', 'agenda_cat')->get();
-        $contratistas = Contratista::with('user')->get();
+        $contratistas = Contratista::with('user', 'agenda_tc')->get();
         $ubicaciones = Ubicacion::all();
         $clientes = Cliente::all();
-        $view = (auth()->user()->type == 'cliente') ? 'tickets.cshow' : 'tickets.show';
 
-        return view($view, array(
+        return view('tickets.show', array(
             'ticket' => $ticket,
             'cats' => $coordinadores,
             'contratistas' => $contratistas,
@@ -145,7 +146,7 @@ class TicketController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Ticket  $ticket
+     * @param  \App\Models\Ticket  $ticket
      * @return \Illuminate\Http\Response
      */
     public function edit(Ticket $ticket)
@@ -167,7 +168,7 @@ class TicketController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Ticket  $ticket
+     * @param  \App\Models\Ticket  $ticket
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Ticket $ticket)
@@ -202,120 +203,25 @@ class TicketController extends Controller
         return redirect()->route('tickets.show', $ticket->id)->with('message', 'Coordinador asignado correctamente!');
     }
 
-    public function asignarPrototipo(Request $request)
-    {
-        $body = $request->input();
-        $prototipo = $body['prototipo'];
-
-        if ($prototipo != '') {
-
-            $ticket = Ticket::findOrFail($body['id']);
-            $ticket->prototipo = $prototipo;
-            $ticket->update();
-
-            $mensaje = 'Prototipo asignado correctamente.';
-        } else {
-            $mensaje = 'Agregue un prototipo.';
-        }
-
-        return response()->json(array(
-            'mensaje' => $mensaje,
-        ));
-    }
-
-    public function asignarCita(Request $request)
-    {
-
-        $body = $request->input();
-        $cita = $body['cita'];
-
-        if (!is_null($cita)) {
-
-            $ticket = Ticket::findOrFail($body['id']);
-            $ticket->cita_cat = Carbon::createFromFormat('d/m/Y', $cita)->format('Y-m-d');
-            $ticket->save();
-
-            $mensaje = 'Cita asignada correctamente.';
-        } else {
-            $mensaje = 'No has seleccionado una fecha para la cita.';
-        }
-
-        return response()->json(array(
-            'mensaje' => $mensaje,
-        ));
-    }
-
-    public function asignarCitaAtencion(Request $request)
-    {
-
-        $body = $request->input();
-        $ticket = Ticket::findOrFail($body['id']);
-        $citaAtencion = $body['citaAtencion'];
-
-        if (!is_null($citaAtencion)) {
-
-            $ticket = Ticket::findOrFail($body['id']);
-            $field = "cita_atencion_" . $body['numeroCita'];
-            $ticket->$field = Carbon::createFromFormat('m/d/Y g:i A', $citaAtencion)->format('Y-m-d H:i');
-            $ticket->save();
-
-            $mensaje = 'Cita asignada correctamente.';
-        } else {
-            $mensaje = 'No has seleccionado una fecha para la cita.';
-        }
-
-        return response()->json(array(
-            'mensaje' => $mensaje,
-        ));
-    }
-
-    public function asignarFechaReporte(Request $request)
-    {
-        $body = $request->input();
-        $ticket = Ticket::findOrFail($body['id']);
-        $fechaReporte = $body['fechaReporte'];
-
-        if (!is_null($fechaReporte)) {
-
-            $ticket = Ticket::findOrFail($body['id']);
-            $ticket->created_at = Carbon::createFromFormat('d/m/Y', $fechaReporte)->format('Y-m-d');
-            $ticket->save();
-
-            $mensaje = 'Fecha de reporte cambiada correctamente.';
-        } else {
-            $mensaje = 'No has seleccionado una fecha de reporte del ticket.';
-        }
-
-        return response()->json(array(
-            'mensaje' => $mensaje,
-        ));
-    }
-
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Ticket  $ticket
+     * @param  \App\Models\Ticket  $ticket
      * @return \Illuminate\Http\Response
      */
     public function destroy(Ticket $ticket)
     {
-        $ticket = Ticket::findOrFail($ticket->id);
-        $ticket->estado = 'Cancelada';
-        $ticket->update();
+        $ticket->delete();
 
-        return redirect('/tickets')
-            ->with('message', 'Se ha eliminado el ticket correctamente');
+        return redirect()->route('tickets.index')
+            ->with('message', 'Ticket eliminado correctamente');
     }
 
     public function genaratePDF($ticket_id)
     {
         $ticket = Ticket::findOrFail($ticket_id);
 
-        if ($ticket->cita_cat) {
-            $ticket->cita_cat = Carbon::createFromFormat('Y-m-d', $ticket->cita_cat)->format('d/m/Y');
-        }
-
         $pdf = PDF::loadView('pdf.dictamen', compact('ticket'));
-        return $pdf->download('Dictamen' . $ticket_id . '.pdf');
+        return $pdf->stream('Dictamen' . $ticket_id . '.pdf');
     }
 }

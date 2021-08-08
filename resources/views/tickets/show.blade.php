@@ -32,9 +32,36 @@
 			</ul>
 		</div>
 		@endif
+		<div class="text-right mb-3">
+			@can('contestar', $ticket->encuesta)
+			<a href="{{ route('encuestas.contestar', $ticket->encuesta->id) }}" class="btn btn-info">
+				Contestar encuesta
+			</a>
+			@else
+				@can('view', $ticket->encuesta)
+				<a href="{{ route('encuestas.show', $ticket->encuesta->id) }}" class="btn btn-info">
+					Ver encuesta
+				</a>
+				@endcan
+			@endcan
+			<a href="{{ route('tickets.showPDF', $ticket->id) }}" class="btn btn-primary">
+				Descargar PDF
+			</a>
+			@can('delete', $ticket)
+			<button class="btn btn-danger" data-toggle="modal" data-target="#modal-eliminar">
+				Eliminar
+			</button>
+			@endcan
+			<a href="{{ route('tickets.index') }}" class="btn btn-secondary">Regresar</a>
+		</div>
 		<div class="card">
 			<div class="card-header">
 				<h3 class="card-title">Información general</h3>
+				<div class="card-tools">
+					<button type="button" class="btn btn-secondary btn-sm" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+						<i class="fas fa-minus"></i>
+					</button>
+				</div>
 			</div>
 			<!-- /.card-header -->
 			<div class="card-body">
@@ -47,8 +74,20 @@
 					</div>
 					<div class="col-sm-6">
 						<div class="form-group">
+							<label>Estado</label>
+							<p>{{ $ticket->nombre_estado }}</p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
 							<label>Fecha de reporte</label>
-							<p>{{ $ticket->created_at }}</p>
+							<p>{{ $ticket->created_at?->format('d/m/Y H:i') }}</p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Fecha poliza</label>
+							<p>{{ $ticket->cliente?->fecha_poliza?->format('d/m/Y') }}</p>
 						</div>
 					</div>
 					<div class="col-sm-6">
@@ -59,11 +98,9 @@
 					</div>
 					<div class="col-sm-6">
 						<div class="form-group">
-							<label>No. Cliente</label>
+							<label>Prototipo</label>
 							<p>
-								<a href="{{ route('clientes.show', $ticket->cliente_id) }}">
-									{{ $ticket->cliente?->numero_cliente }}
-								</a>
+								{{ $ticket->prototipo ?? 'n/a' }}
 							</p>
 						</div>
 					</div>
@@ -71,7 +108,7 @@
 						<div class="form-group">
 							<label>Cliente</label>
 							<p>
-								<a href="{{ route('clientes.show', $ticket->cliente_id) }}">
+								<a @can('view', $ticket['cliente']) href="{{ route('clientes.show', $ticket->cliente_id) }}" @endcan target="_blank">
 									{{ $ticket->cliente?->nombre }}
 								</a>
 							</p>
@@ -79,128 +116,216 @@
 					</div>
 					<div class="col-sm-6">
 						<div class="form-group">
+							<label>No. Cliente</label>
+							<p>
+								{{ $ticket->cliente?->numero_cliente }}
+							</p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
 							<label>Teléfono</label>
-							<p>{{ $ticket->cliente?->telefono }}</p>
+							<p>
+								<a href="tel:{{ $ticket->cliente?->telefono }}">
+									{{ $ticket->cliente?->telefono }}
+								</a>
+							</p>
 						</div>
 					</div>
 					<div class="col-sm-6">
 						<div class="form-group">
-							<label>Fecha poliza</label>
-							<p>{{ $ticket->cliente?->fecha_poliza }}</p>
-						</div>
-					</div>
-					<div class="col-sm-6">
-						<div class="form-group">
-							<label>Estado</label>
-							<p>{{ $ticket->nombre_estado }}</p>
+							<label>Correo</label>
+							<p>
+								<a href="mailto:{{ $ticket->cliente?->correo }}">
+									{{ $ticket->cliente?->correo }}
+								</a>
+							</p>
 						</div>
 					</div>
 				</div>
-            </div>
-        </div>
-		<div class="card">
-			<div class="card-header">
-				<h3 class="card-title">Fallas reportadas</h3>
-			</div>
-			<!-- /.card-header -->
-			<div class="card-body">
 				<div class="row">
 					<div class="col-sm-6">
 						<div class="form-group">
 							<label>CAT Asignado</label>
 							@if($ticket->coordinador)
-							<p>{{ $ticket->coordinador->numero_cat }} {{ $ticket->coordinador->nombre }}</p>
+							<p>
+								<a @can('view', $ticket['coordinador']) href="{{ route('cat.show', $ticket->cat_id) }}" @endcan target="_blank">
+									{{ $ticket->coordinador->nombre }}
+								</a>
+							</p>
 							@else
 							<p>Sin asignar</p>
 							@endif
 						</div>
 					</div>
-					<div class="col-sm-4">
+					<div class="col-sm-6">
 						<div class="form-group">
 							<label>Fecha de cita</label>
 							@if($ticket->coordinador && $ticket->cita_cat)
-							<p>{{ $ticket->cita_cat }}</p>
+							<p>{{ $ticket->cita_cat?->format('d/m/Y H:i') }}</p>
 							@else
 							<p>Sin asignar</p>
 							@endif
 						</div>
 					</div>
-					@can('asignarCat', $ticket)
-					<div class="col-sm-2 d-flex align-items-center justify-content-end">
-						<button class="btn btn-primary" data-toggle="modal" data-target="#modal-cat">
-							Asignar CAT
-						</button>
-					</div>
-					@endcan
+					
 				</div>
-				@foreach($ticket->detalles as $i => $detalle)
-				<div class="">
-					<div class="row border-top mt-3 pt-3">
-						<div class="col-sm-2">
-							<div class="form-group">
-								<label>Familia</label>
-								<p>{{ $detalle->familia?->nombre }}</p>
-							</div>
+            </div>
+			<div class="card-footer text-right">
+				@can('asignarCat', $ticket)
+				<button class="btn btn-primary" data-toggle="modal" data-target="#modal-cat">
+					Asignar CAT
+				</button>
+				@endcan
+			</div>
+        </div>
+		@foreach($ticket->detalles as $i => $detalle)
+		@can('view', $detalle)
+		<div class="card">
+			<div class="card-header">
+				<h3 class="card-title">{{ $detalle->toString() }}</h3>
+				<div class="card-tools">
+					<button type="button" class="btn btn-secondary btn-sm" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+						<i class="fas fa-minus"></i>
+					</button>
+				</div>
+			</div>
+			<!-- /.card-header -->
+			<div class="card-body">
+				<div class="row">
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label>Familia</label>
+							<p>{{ $detalle->familia?->nombre }}</p>
 						</div>
-						<div class="col-sm-2">
-							<div class="form-group">
-								<label>Concepto</label>
-								<p>{{ $detalle->concepto?->nombre }}</p>
-							</div>
+					</div>
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label>Concepto</label>
+							<p>{{ $detalle->concepto?->nombre }}</p>
 						</div>
-						<div class="col-sm-2">
-							<div class="form-group">
-								<label>Falla</label>
-								<p>{{ $detalle->falla?->nombre }}</p>
-							</div>
+					</div>
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label>Falla</label>
+							<p>{{ $detalle->falla?->nombre }}</p>
 						</div>
-						<div class="col-sm-2">
-							<div class="form-group">
-								<label>Ubicación</label>
-								<p>{{ $detalle->ubicacion?->nombre }}</p>
-							</div>
+					</div>
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label>Ubicación</label>
+							<p>{{ $detalle->ubicacion?->nombre }}</p>
 						</div>
-						<div class="col-sm-2">
-							<div class="form-group">
-								<label>Procede</label>
-								<p>{{ $detalle->valoracion }}</p>
-							</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Procede</label>
+							<p>{{ $detalle->valoracion }}</p>
 						</div>
-						<div class="col-sm-2">
-							<div class="form-group">
-								<label>Estado</label>
-								@if($detalle->valoracion == 'Si')
-								<p>{{ $detalle->estado }}</p>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Observaciones</label>
+							<p>{{ $detalle->observacion ?? 'n/a' }}</p>
+						</div>
+					</div>
+				</div>
+				<table class="table table-hover table-striped">
+					<thead>
+						<tr>
+							<th>Contratista</th>
+							<th>Fecha agendada</th>
+							<th>Fecha de atención</th>
+							<th>Finalizado</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						@forelse($detalle->manpowers as $manpower)
+						<tr>
+							<td>
+								<a @can('view', $manpower['contratista']) href="{{ route('contratistas.show', $manpower->contratista_id) }}" @endcan target="_blank">
+									{{ $manpower->contratista?->nombre }}
+								</a>
+							</td>
+							<td>
+								{{ $manpower->agendado_desde?->format('d/m/Y') }}<br />
+								{{ $manpower->agendado_desde?->format('H:i') }} - 
+								{{ $manpower->agendado_hasta?->format('H:i') }}
+							</td>
+							<td>
+								@if($manpower->finalizado)
+								{{ $manpower->trabajado_desde?->format('d/m/Y') }}<br />
+								{{ $manpower->trabajado_desde?->format('H:i') }} - 
+								{{ $manpower->trabajado_hasta?->format('H:i') }}
 								@else
-								<p>-</p>
+								-
 								@endif
-							</div>
-						</div>
-						
-						<div class="col-sm-12 text-right">
-							@can('valorar', $detalle)
-							<button class="btn btn-primary"
-								data-action="{{ route('detalles-ticket.valorar', $detalle->id) }}"
-								data-falla="{{ $detalle->toString() }}"
-								data-valoracion="{{ $detalle->valoracion }}"
-								data-observacion="{{ $detalle->observacion }}"
-								data-toggle="modal"
-								data-target="#modal-valorar">
-								Valorar
-							</button>
-							@endcan
-							@can('asignarContratista', $detalle)
-							<button class="btn btn-primary">Asignar contratista</button>
-							@endcan
-						</div>
-					</div>
-				</div>
-				@endforeach
+							</td>
+							<td>
+								{{ $manpower->finalizado ? 'Sí' : 'No' }}
+							</td>
+							<td class="text-right">
+								@can('delete', $manpower)
+								<button class="btn btn-danger"
+									data-action="{{ route('manpowers.destroy', $manpower->id) }}"
+									data-falla="{{ $detalle->toString() }}"
+									data-contratista="{{ $manpower->contratista?->nombre }}"
+									data-toggle="modal"
+									data-target="#modal-eliminar-contratista">
+									Eliminar
+								</button>
+								@endcan
+								@can('registrarTrabajo', $manpower)
+								<button class="btn btn-secondary"
+									data-action="{{ route('manpowers.log', $manpower->id) }}"
+									data-falla="{{ $detalle->toString() }}"
+									data-contratista="{{ $manpower->contratista?->nombre }}"
+									data-desde="{{ old('trabajado_desde', $manpower->trabajado_desde ?? $manpower->agendado_desde) }}"
+									data-hasta="{{ old('trabajado_hasta', $manpower->trabajado_hasta ?? $manpower->agendado_hasta) }}"
+									data-toggle="modal"
+									data-target="#modal-trabajo">
+									Registrar atención
+								</button>
+								@endcan
+							</td>
+						@empty
+							<td colspan="5" class="text-center text-muted">
+								Sin contratistas asignados
+							</td>
+						</tr>
+						@endforelse
+					</tbody>
+				</table>
+			</div>
+			<div class="card-footer text-right">
+				@can('valorar', $detalle)
+				<button class="btn btn-primary"
+					data-action="{{ route('detalles-ticket.valorar', $detalle->id) }}"
+					data-falla="{{ $detalle->toString() }}"
+					data-valoracion="{{ $detalle->valoracion }}"
+					data-observacion="{{ $detalle->observacion }}"
+					data-toggle="modal"
+					data-target="#modal-valorar">
+					Valorar falla
+				</button>
+				@endcan
+				@can('asignarContratista', $detalle)
+				<button class="btn btn-primary"
+					data-action="{{ route('detalles-ticket.contratistas.store', $detalle->id) }}"
+					data-falla="{{ $detalle->toString() }}"
+					data-toggle="modal"
+					data-target="#modal-contratista">
+					Asignar contratista
+				</button>
+				@endcan
 			</div>
 		</div>
+		@endcan
+		@endforeach
     </div>
 </section>
-@can('asignarCat', $ticket)
+
 <!-- Modal -->
 <div class="modal fade" id="modal-cat" tabindex="-1">
 	<div class="modal-dialog modal-xl modal-dialog-scrollable">
@@ -215,7 +340,7 @@
 			<div class="modal-body pt-0">
 				<div class="form-group mt-2">
 					<label for="select-coordinador">Coordinador de atención técnica</label>
-					<select class="form-control" id="select-coordinador" name="cat_id">
+					<select class="form-control select-resource" id="select-coordinador" name="cat_id">
 						<option value="" selected>Sin asignar</option>
 						@foreach($cats as $cat)
 						<option value="{{ $cat->id }}"
@@ -226,26 +351,39 @@
 						</option>
 						@endforeach
 					</select>
-					<input type="hidden" name="cita_cat" value="{{ old('cita_cat', $ticket->cita_cat?->format('Y-m-d H:i:s')) }}">
-					<input type="hidden" name="cita_cat_fin" value="{{ old('cita_cat_fin', $ticket->cita_cat_fin?->format('Y-m-d H:i:s')) }}">
+					<input
+						class="event-start"
+						type="hidden"
+						name="cita_cat"
+						value="{{ old('cita_cat', $ticket->cita_cat?->format('Y-m-d H:i:s')) }}">
+					<input
+						class="event-end"
+						type="hidden"
+						name="cita_cat_fin"
+						value="{{ old('cita_cat_fin', $ticket->cita_cat_fin?->format('Y-m-d H:i:s')) }}">
 				</div><!-- /.col -->
 				<div class="text-center text-muted mb-2">
 					Selecciona horario de cita en el calendario
 				</div>
 				<div class="row">
-					<div class="col-sm-6 d-flex">
+					<div class="col-sm-4 d-flex">
 						<div class="alert alert-success flex-grow-1">
 							Horario de cita correcto
 						</div>
 					</div>
-					<div class="col-sm-6 d-flex">
+					<div class="col-sm-4 d-flex">
+						<div class="alert alert-info flex-grow-1">
+							Horario de cita es correcto, pero esta en el pasado.
+						</div>
+					</div>
+					<div class="col-sm-4 d-flex">
 						<div class="alert alert-warning flex-grow-1">
 							Horario de cita no cumple con agenda de CAT o se empalma con otra cita.
 						</div>
 					</div>
 				</div>
 				
-				<div id='calendar'></div>
+				<div class="calendar"></div>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
@@ -254,7 +392,6 @@
 		</form>
 	</div>
 </div>
-@endcan
 
 <!-- Modal -->
 <div class="modal fade" id="modal-valorar" tabindex="-1">
@@ -272,7 +409,7 @@
 					<div class="col-sm-6">
 						<div class="form-group">
 							<label>Falla</label>
-							<p id="falla"></p>
+							<p id="falla-valorar"></p>
 						</div>
 					</div>
 					<div class="col-sm-6">
@@ -301,58 +438,215 @@
 	</div>
 </div>
 
+<div class="modal fade" id="modal-contratista" tabindex="-1">
+	<div class="modal-dialog modal-xl modal-dialog-scrollable">
+		<form class="modal-content" method="post" id="form-contratista">
+			@csrf()
+			<div class="modal-header">
+				<h5 class="modal-title">
+					Asignar contratista - 
+					<span id="falla-contratista"></span>
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body pt-0">
+				<div class="form-group mt-2">
+					<label for="select-contratista">Contratista</label>
+					<select class="form-control select-resource" id="select-contratista" name="contratista_id" required>
+						<option value="" selected disabled>Selecciona contratista</option>
+						@foreach($contratistas as $contratista)
+						<option value="{{ $contratista->id }}" @if(old('contratista_id') == $contratista['id']) selected @endif>
+							{{ $contratista->nombre }}
+						</option>
+						@endforeach
+					</select>
+					<input
+						class="event-start"
+						type="hidden"
+						name="agendado_desde"
+						value="{{ old('agendado_desde') }}"
+						required>
+					<input
+						class="event-end"
+						type="hidden"
+						name="agendado_hasta"
+						value="{{ old('agendado_hasta') }}"
+						required>
+				</div><!-- /.col -->
+				<div class="text-center text-muted mb-2">
+					Selecciona horario de trabajo en el calendario
+				</div>
+				<div class="row">
+					<div class="col-sm-4 d-flex">
+						<div class="alert alert-success flex-grow-1">
+							Horario de trabajo correcto.
+						</div>
+					</div>
+					<div class="col-sm-4 d-flex">
+						<div class="alert alert-info flex-grow-1">
+							Horario de trabajo es correcto, pero esta en el pasado.
+						</div>
+					</div>
+					<div class="col-sm-4 d-flex">
+						<div class="alert alert-warning flex-grow-1">
+							Horario de trabajo no cumple con agenda de contratista o se empalma con otro trabajo.
+						</div>
+					</div>
+				</div>
+				
+				<div class="calendar"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+				<button type="submit" class="btn btn-primary">Asignar</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-trabajo" tabindex="-1">
+	<div class="modal-dialog">
+		<form class="modal-content" method="post" id="form-trabajo">
+			@csrf()
+			@method('put')
+			<div class="modal-header">
+				<h5 class="modal-title">
+					Registrar trabajo - 
+					<span id="falla-trabajo"></span>
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Contratista</label>
+							<p id="contratista-trabajo"></p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label for="valoracion">Finalizado</label>
+							<select class="form-control" id="finalizado-trabajo" name="finalizado">
+								<option value="0">No</option>
+								<option value="1">Sí</option>
+							</select>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label for="valoracion">Trabajado desde</label>
+							<div class="input-group" id="trabajado-desde" data-target-input="nearest">
+								<input type="text" name="trabajado_desde" class="form-control datetimepicker-input" data-target="#trabajado-desde" id="desde-trabajo" />
+								<div class="input-group-append" data-target="#trabajado-desde" data-toggle="datetimepicker">
+									<div class="input-group-text"><i class="fa fa-calendar"></i></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label for="valoracion">Trabajado hasta</label>
+							<div class="input-group" id="trabajado-hasta" data-target-input="nearest">
+								<input type="text" name="trabajado_hasta" class="form-control datetimepicker-input" data-target="#trabajado-hasta" id="hasta-trabajo" />
+								<div class="input-group-append" data-target="#trabajado-hasta" data-toggle="datetimepicker">
+									<div class="input-group-text"><i class="fa fa-calendar"></i></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+				<button type="submit" class="btn btn-primary">Registrar trabajo</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-eliminar-contratista" tabindex="-1">
+	<div class="modal-dialog">
+		<form class="modal-content" method="post" id="form-eliminar-contratista">
+			@csrf()
+			@method('delete')
+			<div class="modal-header bg-danger">
+				<h5 class="modal-title">
+					Eliminar asignacion falla - contratista
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<p>
+					¿En verdad desea eliminar la asignación de la falla
+					<strong class="text-danger" id="falla-eliminar-contratista"></strong> de el/la contratista
+					<strong class="text-danger" id="eliminar-contratista"></strong>?
+				</p>
+				<p>
+					Esta accion no podrá ser revertida.
+				</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+				<button type="submit" class="btn btn-danger">Eliminar</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-eliminar" tabindex="-1">
+	<div class="modal-dialog">
+		<form class="modal-content" action="{{ route('tickets.destroy', $ticket->id) }}" method="post" id="form-eliminar">
+			@csrf()
+			@method('delete')
+			<div class="modal-header bg-danger">
+				<h5 class="modal-title">
+					Eliminar ticket
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<p>
+					¿En verdad desea eliminar el ticket con folio #{{ $ticket->id }}?
+				</p>
+				<p>
+					Esta accion no podrá ser revertida.
+				</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+				<button type="submit" class="btn btn-danger">Eliminar</button>
+			</div>
+		</form>
+	</div>
+</div>
+
 @endsection
 
 @push('scripts')
+<script src="{{ asset('/plugins/moment/moment.min.js') }}"></script>
+<script src="{{ asset('/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5/main.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5/locales-all.min.js"></script>
 <script>
 $(window).on('load', function () {
-	const cats = @json($cats->keyBy('id'));
-	const oldTicket = {
-		id: '{{ $ticket->id }}',
-		title: '#{{ $ticket->id }}',
-		start: '{{ old('cita_cat') }}',
-		end: '{{ old('cita_cat_fin') }}',
-	};
-
-	const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-		themeSystem: 'bootstrap',
-		initialView: 'timeGridWeek',
+	$('#trabajado-desde, #trabajado-hasta').datetimepicker({
+		format: 'YYYY-MM-DD HH:mm',
+		stepping: 30,
 		locale: 'es',
-		firstDay: 0,
-		allDaySlot: false,
-		forceEventDuration: true,
-		defaultTimedEventDuration: '0:30',
-		stickyHeaderDates: true,
-		nowIndicator: true,
-		eventResize({ event }) {
-			onEventChange(event);
-		},
-		eventDrop({ event }) {
-			onEventChange(event);
-		},
-		eventClassNames ({ event }) {
-			if (!event.startEditable) {
-				return ['alert-secondary'];
-			}
-			if(isOverlapping(event) || isNotBusinessHour(event)) {
-				return ['alert-warning'];
-			}
-			return ['alert-success'];
-		},
-	});
-
-	$('#modal-cat').on('shown.bs.modal', function () {
-		calendar.render();
-		$('#select-coordinador').trigger('change');
-	});
-
-	$('#select-coordinador').on('change', function () {
-		const catId = this.value;
-		calendar.setOption('businessHours', cats[catId] && cats[catId].working_hours);
-		calendar.setOption('events', fetchEvents(catId));
-		calendar.setOption('dateClick', dateClickHandler(catId));
+		useCurrent: false,
+		sideBySide: true,
 	});
 
 	$('#modal-valorar').on('shown.bs.modal', function (event) {
@@ -364,115 +658,234 @@ $(window).on('load', function () {
 
 		const modal = $(this);
 		modal.find('#form-valoracion').attr('action', action);
-  		modal.find('#falla').text(falla);
+  		modal.find('#falla-valorar').text(falla);
   		modal.find('#valoracion').val(valoracion);
   		modal.find('#observacion').val(observacion);
 	});
 
-	fetchEvents = (catId) => {
-		if (!catId) {
-			onEventChange();
-			return [];
-		}
-		return (info, successCallback, failureCallback) => {
-			$.ajax({
-				type: 'GET',
-				url: '{{ route('cat.schedule.index') }}',
-				data: {
-					start: info.startStr,
-					end: info.endStr,
-					cat_id: catId,
-				},
-				success(response) {
-					const currentId = '{{ $ticket->id }}';
-					const event = oldTicket.start
-						? oldTicket
-						: response.find((event) => event.id == currentId);
-					const items = response.filter((event) => event.id != currentId);
+	$('#modal-contratista').on('shown.bs.modal', function (event) {
+		const button = $(event.relatedTarget); // Button that triggered the modal
+		const action      = button.data('action'); // Extract info from data-* attributes
+		const falla       = button.data('falla');
 
-					if (event) {
-						Object.assign(event, {
-							start: new Date(event.start),
-							end: new Date(event.end),
-							editable: true,
-							durationEditable: true,
-						});
-						items.push(event);
-						onEventChange(event);
-					}
-					successCallback(items);
-				},
-				error: failureCallback,
-			});
-		};
+		const modal = $(this);
+		modal.find('#form-contratista').attr('action', action);
+  		modal.find('#falla-contratista').text(falla);
+	});
+
+	$('#modal-trabajo').on('shown.bs.modal', function (event) {
+		const button = $(event.relatedTarget); // Button that triggered the modal
+		const action = button.data('action'); // Extract info from data-* attributes
+		const falla = button.data('falla');
+		const desde = button.data('desde');
+		const hasta = button.data('hasta');
+		const contratista = button.data('contratista');
+
+		const modal = $(this);
+		modal.find('#form-trabajo').attr('action', action);
+  		modal.find('#falla-trabajo').text(falla);
+  		modal.find('#contratista-trabajo').text(contratista);
+  		modal.find('#finalizado-trabajo').val('1');
+  		modal.find('#desde-trabajo').val(desde);
+  		modal.find('#hasta-trabajo').val(hasta);
+	});
+
+	$('#modal-eliminar-contratista').on('shown.bs.modal', function (event) {
+		const button = $(event.relatedTarget); // Button that triggered the modal
+		const action = button.data('action'); // Extract info from data-* attributes
+		const falla = button.data('falla');
+		const contratista = button.data('contratista');
+
+		const modal = $(this);
+		modal.find('#form-eliminar-contratista').attr('action', action);
+  		modal.find('#falla-eliminar-contratista').text(falla);
+  		modal.find('#eliminar-contratista').text(contratista);
+	});
+});
+</script>
+<script>
+$(window).on('load', function () {
+	const coordinadores = @json($cats->keyBy('id'));
+	const oldEventCoordinador = {
+		start: '{{ old('cita_cat') }}',
+		end: '{{ old('cita_cat_fin') }}',
 	};
 
-	dateClickHandler = (catId) => {
-		if (!catId) {
-			return null;
-		}
-		return function(info) {
-			let event = calendar.getEvents().find((e) => e.id == '{{ $ticket->id }}');
-			if (!event) {
-				event = calendar.addEvent({
-					id: '{{ $ticket->id }}',
-					title: '#{{ $ticket->id }}',
-					start: info.date,
-					editable: true,
-					durationEditable: true,
-				}, true);
-			} else {
-				event.setStart(info.date, { maintainDuration: true });
+	const contratistas = @json($contratistas->keyBy('id'));
+	const oldEventContratista = {
+		start: '{{ old('cita_cat') }}',
+		end: '{{ old('cita_cat_fin') }}',
+	};
+
+	setUpCalendar({
+		modalSelector: '#modal-cat',
+		fetchUrl: '{{ route('schedules.coordinador') }}',
+		eventId: '{{ $ticket->id }}',
+		eventTitle: '#{{ $ticket->id }}',
+		prevEvent: oldEventCoordinador,
+		resources: coordinadores,
+		initialDate:'{{ old('cita_cat', $ticket->cita_cat) }}' || undefined,
+	});
+
+	setUpCalendar({
+		modalSelector: '#modal-contratista',
+		fetchUrl: '{{ route('schedules.contratista') }}',
+		eventId: new Date().getTime(),
+		eventTitle: '#{{ $ticket->id }}',
+		prevEvent: oldEventContratista,
+		resources: contratistas,
+	});
+
+	function setUpCalendar({ modalSelector, fetchUrl, eventId, eventTitle, prevEvent, resources, initialDate }) {
+		const modal = $(modalSelector);
+		const calendar = new FullCalendar.Calendar(modal.find('.calendar').get(0), {
+			themeSystem: 'bootstrap',
+			initialView: 'timeGridWeek',
+			locale: 'es',
+			firstDay: 0,
+			allDaySlot: false,
+			forceEventDuration: true,
+			defaultTimedEventDuration: '0:30',
+			stickyHeaderDates: true,
+			nowIndicator: true,
+			eventResize({ event }) {
+				onEventChange(event);
+			},
+			eventDrop({ event }) {
+				onEventChange(event);
+			},
+			eventClassNames ({ event, isPast }) {
+				if (!event.startEditable) {
+					return ['alert-secondary'];
+				}
+				if(isOverlapping(event) || isNotBusinessHour(event)) {
+					return ['alert-warning'];
+				}
+				if (isPast) {
+					return ['alert-info'];
+				}
+				return ['alert-success'];
+			},
+			initialDate,
+		});
+
+		modal.on('shown.bs.modal', function () {
+			calendar.render();
+			modal.find('.select-resource').trigger('change');
+		});
+
+		modal.find('.select-resource').on('change', function () {
+			const resId = this.value;
+			calendar.setOption('businessHours', resources[resId] && resources[resId].working_hours);
+			calendar.setOption('events', fetchEvents(resId));
+			calendar.setOption('dateClick', dateClickHandler(resId));
+		});
+
+		const fetchEvents = (resId) => {
+			if (!resId) {
+				onEventChange();
+				return [];
 			}
-			onEventChange(event);
+			return (info, successCallback, failureCallback) => {
+				$.ajax({
+					type: 'GET',
+					url: fetchUrl,
+					data: {
+						start: info.startStr,
+						end: info.endStr,
+						resource_id: resId,
+					},
+					success(response) {
+						const event = prevEvent.start
+							? prevEvent
+							: response.find((event) => event.id == eventId);
+						const items = response.filter((event) => event.id != eventId);
+
+						if (event) {
+							Object.assign(event, {
+								id: eventId,
+								title: eventTitle,
+								start: new Date(event.start),
+								end: new Date(event.end),
+								editable: true,
+								durationEditable: true,
+							});
+							items.push(event);
+							onEventChange(event);
+						}
+						successCallback(items);
+					},
+					error: failureCallback,
+				});
+			};
 		};
-	};
 
-	const isNotBusinessHour = (event) => {
-		let businessHours = calendar.getOption('businessHours');
-		if (!businessHours) {
-			return false;
-		}
-		if(!(businessHours instanceof Array)) {
-			businessHours = [businessHours];
-		}
-		const day = event.start.getDay();
-		const start = event.start.toTimeString().slice(0, 5);
-		const end = event.end.toTimeString().slice(0, 5);
-		return !businessHours.some(
-			(info) => info.daysOfWeek.includes(day) && start >= info.startTime && end <= info.endTime
-		);
-	}
+		const dateClickHandler = (resId) => {
+			if (!resId) {
+				return null;
+			}
+			return function(info) {
+				let event = calendar.getEvents().find((e) => e.id == eventId);
+				if (!event) {
+					event = calendar.addEvent({
+						id: eventId,
+						title: eventTitle,
+						start: info.date,
+						editable: true,
+						durationEditable: true,
+					}, true);
+				} else {
+					event.setStart(info.date, { maintainDuration: true });
+				}
+				onEventChange(event);
+			};
+		};
 
-	const isOverlapping = (event) => {
-		const events = calendar.getEvents();
-		return events.some((e) => {
-			if (e.id == event.id) {
+		const isNotBusinessHour = (event) => {
+			let businessHours = calendar.getOption('businessHours');
+			if (!businessHours) {
 				return false;
 			}
-			const e1start = e.start.getTime();
-			const e1end = e.end.getTime();
-			const e2start = event.start.getTime();
-			const e2end = event.end.getTime();
-			return (e1start >= e2start && e1start < e2end || e2start >= e1start && e2start < e1end);
-		});
+			if(!(businessHours instanceof Array)) {
+				businessHours = [businessHours];
+			}
+			const day = event.start.getDay();
+			const start = event.start.toTimeString().slice(0, 5);
+			const end = event.end.toTimeString().slice(0, 5);
+			return !businessHours.some(
+				(info) => info.daysOfWeek.includes(day) && start >= info.startTime && end <= info.endTime
+			);
+		}
+
+		const isOverlapping = (event) => {
+			const events = calendar.getEvents();
+			return events.some((e) => {
+				if (e.id == event.id) {
+					return false;
+				}
+				const e1start = e.start.getTime();
+				const e1end = e.end.getTime();
+				const e2start = event.start.getTime();
+				const e2end = event.end.getTime();
+				return (e1start >= e2start && e1start < e2end || e2start >= e1start && e2start < e1end);
+			});
+		}
+
+		const onEventChange = (event = null) => {
+			const start = event ? formatDate(event.start) : '';
+			const end = event ? formatDate(event.end) : '';
+			modal.find('.event-start').val(start);
+			modal.find('.event-end').val(end);
+		};
+
+		const formatDate = (date) =>
+			date.getFullYear() + "-" +
+			("00" + (date.getMonth() + 1)).slice(-2) + "-" +
+			("00" + date.getDate()).slice(-2) + " " +
+			("00" + date.getHours()).slice(-2) + ":" +
+			("00" + date.getMinutes()).slice(-2) + ":" +
+			("00" + date.getSeconds()).slice(-2);
 	}
-
-	const onEventChange = (event = null) => {
-		const start = event ? formatDate(event.start) : '';
-		const end = event ? formatDate(event.end) : '';
-		$('[name=cita_cat]').val(start);
-		$('[name=cita_cat_fin]').val(end);
-	};
-
-	var formatDate = (date) =>
-		date.getFullYear() + "-" +
-		("00" + (date.getMonth() + 1)).slice(-2) + "-" +
-		("00" + date.getDate()).slice(-2) + " " +
-		("00" + date.getHours()).slice(-2) + ":" +
-		("00" + date.getMinutes()).slice(-2) + ":" +
-		("00" + date.getSeconds()).slice(-2);
-
 });
 </script>
 @endpush

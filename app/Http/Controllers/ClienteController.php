@@ -72,10 +72,10 @@ class ClienteController extends Controller
             "Nombre_completo" => "required|string",
             "Coopropietario" => "nullable|string",
             "Correo" => "required|email|unique:users,email",
-            "Telefono" => "required|numeric",
+            "Telefono" => "required|digits:10",
             "Fecha_escrituracion" => "required|date_format:Y-m-d",
-            "Fecha_poliza" => "required||date_format:Y-m-d",
-            "Fecha_entrega" => "required||date_format:Y-m-d",
+            "Fecha_poliza" => "required|date_format:Y-m-d",
+            "Fecha_entrega" => "required|date_format:Y-m-d",
             "Comentarios" => "nullable|string"
         ]);
 
@@ -159,7 +159,7 @@ class ClienteController extends Controller
             "Nombre_completo" => "required|string",
             "Coopropietario" => "nullable|string",
             "Correo" => "email|required|string",
-            "Telefono" => "required|numeric",
+            "Telefono" => "required|digits:10",
             "Fecha_escrituracion" => "required|string",
             "Fecha_poliza" => "required|string",
             "Fecha_entrega" => "required|string",

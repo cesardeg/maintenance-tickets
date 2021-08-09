@@ -31,39 +31,39 @@
 				@if ( auth()->user()->type == 'user' )
 				<li class="nav-item">
 					<a href="/clientes" class="nav-link" id="clientes"> <!-- active -->
-						<i class="nav-icon fas fa-user"></i>
+						<i class="nav-icon fas fa-house-user fa-fw"></i>
 						<p>
 							Clientes
 						</p>
 					</a>
 				</li>
 				<li class="nav-item">
+					<a href="/cat" class="nav-link" id="cat">
+						<i class="nav-icon fas fa-user-check fa-fw"></i>
+						<p>
+							Coordinadores
+						</p>
+					</a>
+				</li>
+				<li class="nav-item">
 					<a href="/contratistas" class="nav-link" id="contratistas">
-						<i class="nav-icon fas fa-user"></i>
+						<i class="nav-icon fas fa-user-cog fa-fw"></i>
 						<p>
 							Contratistas
 						</p>
 					</a>
 				</li>
 				<li class="nav-item">
-					<a href="/cat" class="nav-link" id="cat">
-						<i class="nav-icon fas fa-user"></i>
-						<p>
-							CAT
-						</p>
-					</a>
-				</li>
-				<li class="nav-item">
 					<a href="/tickets" class="nav-link" id="tickets">
-						<i class="nav-icon fas fa-ticket-alt"></i>
+						<i class="nav-icon fas fa-ticket-alt fa-fw"></i>
 						<p>
-							Ticket
+							Tickets
 						</p>
 					</a>
 				</li>
 				<li class="nav-item has-treeview">
 					<a href="#" class="nav-link">
-						<i class="nav-icon fas fa-chart-pie"></i>
+						<i class="nav-icon fas fa-chart-pie fa-fw"></i>
 						<p>
 							Estadistícas
 							<i class="right fas fa-angle-left"></i>
@@ -104,7 +104,7 @@
 				</li>
 				<li class="nav-item has-treeview">
 					<a href="#" class="nav-link">
-						<i class="nav-icon fas fa-cog"></i>
+						<i class="nav-icon fas fa-cog fa-fw"></i>
 						<p>
 							Herramientas
 							<i class="right fas fa-angle-left"></i>
@@ -113,7 +113,7 @@
 					<ul class="nav nav-treeview">
 						<li class="nav-item">
 							<a href="/condominios" class="nav-link">
-								<i class="fas fa-hotel nav-icon"></i>
+								<i class="fas fa-building nav-icon"></i>
 								<p>Condominios</p>
 							</a>
 						</li>
@@ -124,7 +124,7 @@
 					<a href="/tickets" class="nav-link" id="tickets">
 						<i class="nav-icon fas fa-ticket-alt"></i>
 						<p>
-							Ticket
+							Tickets
 						</p>
 					</a>
 				</li>

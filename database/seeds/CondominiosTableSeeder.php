@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use App\Condominio;
+use App\Models\Condominio;
 
 class CondominiosTableSeeder extends Seeder
 {

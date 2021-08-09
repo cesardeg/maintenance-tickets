@@ -12,46 +12,7 @@
 	<div class="container-fluid">
 		<div class="row mb-2">
 			<div class="col-sm-6">
-				<h1 class="m-0 text-dark">Dictamen: # {{ $ticket->id }}</h1>
-			</div><!-- /.col -->
-			<div class="col-sm-6">
-				<ol class="breadcrumb float-sm-right">
-                    @if (($ticket->estado == "Terminada" AND auth()->user()->type == 'user') && $ticket->encuestas->first()->active)
-                    <li class="px-2">
-                        <a href="/encuesta/{{$ticket->id}}">
-							<button type="button" class="btn btn-block btn-secondary">Contestar encuesta</button>
-						</a>
-                    </li>
-                    @endif
-                    @if (!$ticket->encuestas->first()->active && !is_null($ticket->encuestas->first()->pregunta_1))
-                    <li class="px-2">
-                        <a href="/encuesta/{{$ticket->id}}">
-							<button type="button" class="btn btn-block btn-secondary">Ver encuesta</button>
-						</a>
-                    </li>
-                    @endif
-                    @if (auth()->user()->type == 'user')
-                    <li class="px-2">
-                        <button type="button" class="btn btn-block btn-warning" data-toggle="modal" data-target="#modal-eliminar">Eliminar ticket</button>
-                    </li>
-                    @endif
-                    <li class="px-2">
-                        <button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#modal-user">Datos del usaurio</button>
-                    </li>
-                    @if (auth()->user()->type == 'user')
-                    <li class="px-2">
-                        <a href="/generarDictamen/{{ $ticket->id }}">
-                            <button type="button" class="btn btn-block btn-danger" onclick="notReload()">Generar PDF</button>
-                        </a>
-                    </li>
-                    @endif
-					<li class="px-2">
-						<a href="/tickets">
-							<button type="button" class="btn btn-block btn-secondary">Regresar</button>
-						</a>
-					</li>
-
-				</ol>
+				<h1 class="m-0 text-dark">Detalle de ticket</h1>
 			</div><!-- /.col -->
 		</div><!-- /.row -->
 	</div><!-- /.container-fluid -->
@@ -62,629 +23,869 @@
 @section('content')
 <section class="content">
 	<div class="container-fluid">
-		<div class="card card-primary">
+		@if ($errors->any())
+		<div class="alert alert-danger">
+			<ul>
+				@foreach ($errors->all() as $error)
+				<li>{{ $error }}</li>
+				@endforeach
+			</ul>
+		</div>
+		@endif
+		<div class="text-right mb-3">
+			@can('contestar', $ticket->encuesta)
+			<a href="{{ route('encuestas.contestar', $ticket->encuesta->id) }}" class="btn btn-info">
+				Contestar encuesta
+			</a>
+			@else
+				@can('view', $ticket->encuesta)
+				<a href="{{ route('encuestas.show', $ticket->encuesta->id) }}" class="btn btn-info">
+					Ver encuesta
+				</a>
+				@endcan
+			@endcan
+			<a href="{{ route('tickets.showPDF', $ticket->id) }}" class="btn btn-primary">
+				Descargar PDF
+			</a>
+			@can('delete', $ticket)
+			<button class="btn btn-danger" data-toggle="modal" data-target="#modal-eliminar">
+				Eliminar
+			</button>
+			@endcan
+			<a href="{{ route('tickets.index') }}" class="btn btn-secondary">Regresar</a>
+		</div>
+		<div class="card">
 			<div class="card-header">
-				<h3 class="card-title">Información</h3>
+				<h3 class="card-title">Información general</h3>
+				<div class="card-tools">
+					<button type="button" class="btn btn-secondary btn-sm" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+						<i class="fas fa-minus"></i>
+					</button>
+				</div>
 			</div>
 			<!-- /.card-header -->
 			<div class="card-body">
-                <input type="hidden" id="ticket_id" name="ticket_id" value="{{ $ticket->id }}">
-                <div class="row">
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label for="CAT">CAT</label>
-                            <div class="input-group">
-                                <select id="cats" class="form-control" name="CAT"  @if($ticket->estado == 'Terminada' OR auth()->user()->type != 'user') disabled @endif >
-                                    <option value="none" {{ old('CAT') == 'none' ? 'selected' : '' }}>Sin Asignar</option>
-                                    @foreach ($cats as $cat)
-                                    <option value="{{ $cat->id }}" {{ old('CAT', $ticket->cat_id) == $cat->id ? 'selected' : '' }} >{{ $cat->nombre }}</option>
-                                    @endforeach
-                                </select>
-                                @if($ticket->estado != 'Terminada' AND auth()->user()->type == 'user')
-                                <button type="button" onclick="asignarCat()" class="btn btn-primary">Asignar</button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label for="Cita">Cita de valoración</label>
-                            <div class="input-group date" id="cita" data-target-input="nearest">
-                                <input type="text" name="Cita" id="cita-input" class="form-control datetimepicker-input" data-target="#cita" value="{{ old('Cita', $cita = (is_null($ticket->cita_cat)) ? '' : date('d/m/Y', strtotime($ticket->cita_cat)) ) }}" @if($ticket->estado == 'Terminada' OR auth()->user()->type != 'user') disabled @endif />
-                                <div class="input-group-append" data-target="#cita" data-toggle="datetimepicker">
-                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                </div>
-                                @if($ticket->estado != 'Terminada' AND auth()->user()->type == 'user')
-                                <button type="button" onclick="asignarCita()" class="btn btn-primary">Asignar</button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="form-group">
-                            <label for="Atencion1">Fecha Atención 1</label>
-                            <div class="input-group date" id="Atencion1" data-target-input="nearest">
-                                <input type="text" name="Atencion1" id="Atencion1-input" class="form-control datetimepicker-input" data-target="#Atencion1" value="{{ old('Atencion1', $cita_atencion_1 = (is_null($ticket->cita_atencion_1)) ? '' : date('d/m/Y h:i A', strtotime($ticket->cita_atencion_1)) ) }}" @if($ticket->estado == 'Terminada' OR auth()->user()->type != 'user') disabled @endif />
-                                <div class="input-group-append" data-target="#Atencion1" data-toggle="datetimepicker">
-                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                </div>
-                                @if($ticket->estado != 'Terminada' AND auth()->user()->type == 'user')
-                                <button type="button" onclick="asignarAtencion(1)" class="btn btn-primary">Asignar</button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="form-group">
-                            <label for="Atencion2">Fecha Atención 2</label>
-                            <div class="input-group date" id="Atencion2" data-target-input="nearest">
-                                <input type="text" name="Atencion2" id="Atencion2-input" class="form-control datetimepicker-input" data-target="#Atencion2" value="{{ old('Atencion2', $cita_atencion_2 = (is_null($ticket->cita_atencion_2)) ? '' : date('d/m/Y h:i A', strtotime($ticket->cita_atencion_2)) ) }}" @if($ticket->estado == 'Terminada' OR auth()->user()->type != 'user') disabled @endif />
-                                <div class="input-group-append" data-target="#Atencion2" data-toggle="datetimepicker">
-                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                </div>
-                                @if($ticket->estado != 'Terminada' AND auth()->user()->type == 'user')
-                                <button type="button" onclick="asignarAtencion(2)" class="btn btn-primary">Asignar</button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="form-group">
-                            <label for="Atencion3">Fecha Atención 3</label>
-                            <div class="input-group date" id="Atencion3" data-target-input="nearest">
-                                <input type="text" name="Atencion3" id="Atencion3-input" class="form-control datetimepicker-input" data-target="#Atencion3" value="{{ old('Atencion3', $cita_atencion_3 = (is_null($ticket->cita_atencion_3)) ? '' : date('d/m/Y h:i A', strtotime($ticket->cita_atencion_3)) ) }}" @if($ticket->estado == 'Terminada' OR auth()->user()->type != 'user') disabled @endif />
-                                <div class="input-group-append" data-target="#Atencion3" data-toggle="datetimepicker">
-                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                </div>
-                                @if($ticket->estado != 'Terminada' AND auth()->user()->type == 'user')
-                                <button type="button" onclick="asignarAtencion(3)" class="btn btn-primary">Asignar</button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label for="Desarrollo">Desarrollo</label>
-                            <input type="text" class="form-control" name="Desarrollo" value="{{ $ticket->cliente->desarrollador }}" disabled>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label for="Domicilio">Domicilio</label>
-                            <input type="text" class="form-control" id="Domicilio" name="Domicilio" value="{{ $ticket->cliente->condominio->nombre }} {{ $ticket->cliente->numero_cliente }}" disabled>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-3">
-                        <div class="form-group">
-                            <label for="Fecha_reporte">Fecha de reporte</label>
-                            <div class="input-group date" id="Fecha_reporte" data-target-input="nearest">
-                                <input type="text" name="Fecha_reporte" id="Fecha_reporte-input" class="form-control datetimepicker-input" data-target="#Fecha_reporte" value="{{ old('Fecha_reporte', date('d/m/Y', strtotime($ticket->created_at)) ) }}" @if($ticket->estado == 'Terminada' OR auth()->user()->type != 'user') disabled @endif />
-                                <div class="input-group-append" data-target="#Fecha_reporte" data-toggle="datetimepicker">
-                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                </div>
-                                @if($ticket->estado != 'Terminada' AND auth()->user()->type == 'user')
-                                <button type="button" onclick="asignarFechaReporte()" class="btn btn-primary">Cambiar</button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="form-group">
-                            <label for="Fecha_poliza">Fecha de póliza</label>
-                            <input type="text" class="form-control" name="Fecha_poliza" value="{{ $ticket->cliente->fecha_poliza }}" disabled>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label for="Prototipo">Prototipo</label>
-                            <div class="input-group" id="prototipo" data-target-input="nearest">
-                                <input type="text" class="form-control" id="Prototipo" name="Prototipo" value="{{ $ticket->prototipo }}" @if($ticket->estado == 'Terminada' OR auth()->user()->type != 'user') disabled @endif >
-                                @if($ticket->estado != 'Terminada' AND auth()->user()->type == 'user')
-                                <button type="button" onclick="agregarPrototipo()" class="btn btn-primary">Asignar</button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <table id="example1" class="table no-padding table-hover table-striped">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Familia</th>
-                        <th>Componente</th>
-                        <th>Falla</th>
-                        <th>Ubicaion</th>
-                        <th>Procede valoración</th>
-                        <th>Estado</th>
-                        <th>Contratista</th>
-                        <th>Detalles</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-
-                    @foreach ($ticket->detalle as $key => $detalle)
-                    <tr>
-                        <td>{{ $key + 1 }}</td>
-                        <td>{{ $detalle->familia->nombre }}</td>
-                        <td>{{ $detalle->concepto->nombre }}</td>
-                        <td>{{ $detalle->falla->nombre }}</td>
-                        <td>{{ $detalle->ubicacion->nombre }}</td>
-                        <td>{{ $detalle->valoracion }}</td>
-                        <td>{{ $detalle->estado }}</td>
-                        @if ($detalle->contratista == null)
-                        <td>Sin asignar</td>
-                        @else
-                        <td>{{ $detalle->contratista->nombre }}</td>
-                        @endif
-                        {{-- @dd($detalle->estado) --}}
-                        <td><button id="fila_{{ $key }}" type="button" onclick="observaciones('{{ $detalle->id }}', '{{ $key+1 }}')" data-toggle="modal" data-target="#modal-default" class="btn btn-block btn-primary">Ver</button></td>
-                    </tr>
-                    @endforeach
-
-                    </tbody>
-                </table>
-            <!-- /.card-body -->
+				<div class="row">
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Folio</label>
+							<p>{{ $ticket->id }}</p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Estado</label>
+							<p>{{ $ticket->nombre_estado }}</p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Fecha de reporte</label>
+							<p>{{ $ticket->created_at?->format('d/m/Y H:i') }}</p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Fecha poliza</label>
+							<p>{{ $ticket->cliente?->fecha_poliza?->format('d/m/Y') }}</p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Condominio</label>
+							<p>{{ $ticket->condominio?->nombre }}</p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Prototipo</label>
+							<p>
+								{{ $ticket->prototipo ?? 'n/a' }}
+							</p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Cliente</label>
+							<p>
+								<a @can('view', $ticket['cliente']) href="{{ route('clientes.show', $ticket->cliente_id) }}" @endcan target="_blank">
+									{{ $ticket->cliente?->nombre }}
+								</a>
+							</p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>No. Cliente</label>
+							<p>
+								{{ $ticket->cliente?->numero_cliente }}
+							</p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Teléfono</label>
+							<p>
+								<a href="tel:{{ $ticket->cliente?->telefono }}">
+									{{ $ticket->cliente?->telefono }}
+								</a>
+							</p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Correo</label>
+							<p>
+								<a href="mailto:{{ $ticket->cliente?->correo }}">
+									{{ $ticket->cliente?->correo }}
+								</a>
+							</p>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>CAT Asignado</label>
+							@if($ticket->coordinador)
+							<p>
+								<a @can('view', $ticket['coordinador']) href="{{ route('cat.show', $ticket->cat_id) }}" @endcan target="_blank">
+									{{ $ticket->coordinador->nombre }}
+								</a>
+							</p>
+							@else
+							<p>Sin asignar</p>
+							@endif
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Fecha de cita</label>
+							@if($ticket->coordinador && $ticket->cita_cat)
+							<p>{{ $ticket->cita_cat?->format('d/m/Y H:i') }}</p>
+							@else
+							<p>Sin asignar</p>
+							@endif
+						</div>
+					</div>
+					
+				</div>
             </div>
+			<div class="card-footer text-right">
+				@can('asignarCat', $ticket)
+				<button class="btn btn-primary" data-toggle="modal" data-target="#modal-cat">
+					Asignar CAT
+				</button>
+				@endcan
+			</div>
         </div>
-        <div class="modal fade" id="modal-default">
-            <div class="modal-dialog">
-                <div class="modal-content bg-default">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Detalle de la falla</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <h5>Asignar Contratista</h5>
-                        <select id="Contratistas" class="form-control" name="contratistas" onchange="asignarContratista()" @if($ticket->estado == 'Terminada' OR auth()->user()->type != 'user') disabled @endif >
-                            <option id="none" value="none" {{ old('contratistas') == 'none' ? 'selected' : '' }}>Sin Asignar</option>
-                            @foreach ($contratistas as $contratista)
-                            <option id="cont_{{ $contratista->id }}" value="{{ $contratista->id }}" {{ old('contratistas', $ticket->contratista_id) == $contratista->id ? 'selected' : '' }} >{{ $contratista->nombre }}</option>
-                            @endforeach
-                        </select>
-                        <hr>
-                        <h5>Procede valoración</h5>
-                        <select id="Valoracion" class="form-control" name="valoracion" onchange="cambiarValoracion()" @if($ticket->estado == 'Terminada' OR auth()->user()->type != 'user') disabled @endif >
-                            <option id="Pendiente" value="Pendiente" {{ old('Estado') == 'Pendiente' ? 'selected' : ''  }}>Pendiente</option>
-                            <option id="Si" value="Si" {{ old('Estado') == 'Si' ? 'selected' : '' }}>Si</option>
-                            <option id="No" value="No" {{ old('Estado') == 'No' ? 'selected' : '' }}>No</option>
-                        </select>
-                        <hr>
-                        <h5>Ubicacion</h5>
-                        <select id="Ubicaciones" class="form-control" name="ubicacion" onchange="cambiarUbicacion()"  @if($ticket->estado == 'Terminada' OR auth()->user()->type != 'user') disabled @endif >
-                            <option id="none" value="none" {{ old('ubicacion') == 'none' ? 'selected' : '' }}>Sin Asignar</option>
-                            @foreach ($ubicaciones as $ubicacion)
-                            <option id="cont_{{ $ubicacion->id }}" value="{{ $ubicacion->id }}" {{ old('ubicacion', $ticket->ubicacion_id) == $ubicacion->id ? 'selected' : '' }} >{{ $ubicacion->nombre }}</option>
-                            @endforeach
-                        </select>
-                        <hr>
-                        <h5>Estado</h5>
-                        <select id="Estados" class="form-control" name="Estado" onchange="cambiarEstado()" @if(auth()->user()->type != 'user') disabled @endif>
-                            <option id="Espera" value="Espera" {{ old('Estado') == 'Espera' ? 'selected' : '' }}>Espera</option>
-                            <option id="En proceso" value="En proceso" {{ old('Estado') == 'En proceso' ? 'selected' : '' }}>En proceso</option>
-                            <option id="Terminada" value="Terminada" {{ old('Estado') == 'Terminada' ? 'selected' : ''  }}>Terminada</option>
-                        </select>
-                        <hr>
-                        <h5>Observaciones</h5>
-                        <textarea  class="form-control" type="text" name="Observaciones" id="Observaciones" onfocusout="agregarObservaciones()"  @if($ticket->estado == 'Terminada' OR auth()->user()->type != 'user') disabled @endif ></textarea>
-                    </div>
-                    <div class="modal-footer justify-content-between">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
-                    </div>
-                </div>
-                <!-- /.modal-content -->
-            </div>
-            <!-- /.modal-dialog -->
-        </div>
+		@foreach($ticket->detalles as $i => $detalle)
+		@can('view', $detalle)
+		<div class="card">
+			<div class="card-header">
+				<h3 class="card-title">{{ $detalle->toString() }}</h3>
+				<div class="card-tools">
+					<button type="button" class="btn btn-secondary btn-sm" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+						<i class="fas fa-minus"></i>
+					</button>
+				</div>
+			</div>
+			<!-- /.card-header -->
+			<div class="card-body">
+				<div class="row">
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label>Familia</label>
+							<p>{{ $detalle->familia?->nombre }}</p>
+						</div>
+					</div>
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label>Concepto</label>
+							<p>{{ $detalle->concepto?->nombre }}</p>
+						</div>
+					</div>
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label>Falla</label>
+							<p>{{ $detalle->falla?->nombre ?? '-' }}</p>
+						</div>
+					</div>
+					<div class="col-sm-3">
+						<div class="form-group">
+							<label>Ubicación</label>
+							<p>{{ $detalle->ubicacion?->nombre }}</p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Procede</label>
+							<p>{{ $detalle->valoracion }}</p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Observaciones</label>
+							<p>{{ $detalle->observacion ?? 'n/d' }}</p>
+						</div>
+					</div>
+				</div>
+				<table class="table table-hover table-striped">
+					<thead>
+						<tr>
+							<th>Contratista</th>
+							<th>Fecha agendada</th>
+							<th>Fecha de atención</th>
+							<th>Finalizado</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						@forelse($detalle->manpowers as $manpower)
+						<tr>
+							<td>
+								<a @can('view', $manpower['contratista']) href="{{ route('contratistas.show', $manpower->contratista_id) }}" @endcan target="_blank">
+									{{ $manpower->contratista?->nombre }}
+								</a>
+							</td>
+							<td>
+								{{ $manpower->agendado_desde?->format('d/m/Y') }}<br />
+								{{ $manpower->agendado_desde?->format('H:i') }} - 
+								{{ $manpower->agendado_hasta?->format('H:i') }}
+							</td>
+							<td>
+								@if($manpower->finalizado)
+								{{ $manpower->trabajado_desde?->format('d/m/Y') }}<br />
+								{{ $manpower->trabajado_desde?->format('H:i') }} - 
+								{{ $manpower->trabajado_hasta?->format('H:i') }}
+								@else
+								-
+								@endif
+							</td>
+							<td>
+								{{ $manpower->finalizado ? 'Sí' : 'No' }}
+							</td>
+							<td class="text-right">
+								@can('delete', $manpower)
+								<button class="btn btn-danger"
+									data-action="{{ route('manpowers.destroy', $manpower->id) }}"
+									data-falla="{{ $detalle->toString() }}"
+									data-contratista="{{ $manpower->contratista?->nombre }}"
+									data-toggle="modal"
+									data-target="#modal-eliminar-contratista">
+									Eliminar
+								</button>
+								@endcan
+								@can('registrarTrabajo', $manpower)
+								<button class="btn btn-secondary"
+									data-action="{{ route('manpowers.log', $manpower->id) }}"
+									data-falla="{{ $detalle->toString() }}"
+									data-contratista="{{ $manpower->contratista?->nombre }}"
+									data-desde="{{ old('trabajado_desde', $manpower->trabajado_desde ?? $manpower->agendado_desde) }}"
+									data-hasta="{{ old('trabajado_hasta', $manpower->trabajado_hasta ?? $manpower->agendado_hasta) }}"
+									data-toggle="modal"
+									data-target="#modal-trabajo">
+									Registrar atención
+								</button>
+								@endcan
+							</td>
+						@empty
+							<td colspan="5" class="text-center text-muted">
+								Sin contratistas asignados
+							</td>
+						</tr>
+						@endforelse
+					</tbody>
+				</table>
+			</div>
+			<div class="card-footer text-right">
+				@can('valorar', $detalle)
+				<button class="btn btn-primary"
+					data-action="{{ route('detalles-ticket.valorar', $detalle->id) }}"
+					data-falla="{{ $detalle->toString() }}"
+					data-valoracion="{{ $detalle->valoracion }}"
+					data-observacion="{{ $detalle->observacion }}"
+					data-toggle="modal"
+					data-target="#modal-valorar">
+					Emitir dictamen
+				</button>
+				@endcan
+				@can('asignarContratista', $detalle)
+				<button class="btn btn-primary"
+					data-action="{{ route('detalles-ticket.contratistas.store', $detalle->id) }}"
+					data-falla="{{ $detalle->toString() }}"
+					data-toggle="modal"
+					data-target="#modal-contratista">
+					Asignar contratista
+				</button>
+				@endcan
+			</div>
+		</div>
+		@endcan
+		@endforeach
+    </div>
+</section>
 
-        <div class="modal fade" id="modal-user">
-            <div class="modal-dialog">
-                <div class="modal-content bg-default">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Cliente</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <h5>Nombre</h5>
-                        <input class="form-control" type="text" value="{{ $ticket->cliente->nombre }}" disabled>
-                        <hr>
-                        <h5>Correo</h5>
-                        <input class="form-control" type="text" value="{{ $ticket->cliente->user->email }}" disabled>
-                        <hr>
-                        <h5>Telefono</h5>
-                        <input class="form-control" type="text" value="{{ $ticket->cliente->telefono }}" disabled>
-                        <hr>
-                    </div>
-                    <div class="modal-footer justify-content-between">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-toggle="modal" data-target="#modal-cambiar-usuario">Cambiar cliente</button>
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
-                    </div>
-                </div>
-                <!-- /.modal-content -->
-            </div>
-            <!-- /.modal-dialog -->
-        </div>
+<!-- Modal -->
+<div class="modal fade" id="modal-cat" tabindex="-1">
+	<div class="modal-dialog modal-xl modal-dialog-scrollable">
+		<form class="modal-content" action="{{ route('tickets.add-cat', $ticket->id) }}" method="post">
+			@csrf()
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Asignar coordinador</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body pt-0">
+				<div class="form-group mt-2">
+					<label for="select-coordinador">Coordinador de atención técnica</label>
+					<select class="form-control select-resource" id="select-coordinador" name="cat_id">
+						<option value="" selected>Sin asignar</option>
+						@foreach($cats as $cat)
+						<option value="{{ $cat->id }}"
+							@if(old('cat_id', $ticket['cat_id']) == $cat['id'])
+								selected
+							@endif>
+							{{ $cat->nombre }}
+						</option>
+						@endforeach
+					</select>
+					<input
+						class="event-start"
+						type="hidden"
+						name="cita_cat"
+						value="{{ old('cita_cat', $ticket->cita_cat?->format('Y-m-d H:i:s')) }}">
+					<input
+						class="event-end"
+						type="hidden"
+						name="cita_cat_fin"
+						value="{{ old('cita_cat_fin', $ticket->cita_cat_fin?->format('Y-m-d H:i:s')) }}">
+				</div><!-- /.col -->
+				<div class="text-center text-muted mb-2">
+					Selecciona horario de cita en el calendario
+				</div>
+				<div class="row">
+					<div class="col-sm-4 d-flex">
+						<div class="alert alert-success flex-grow-1">
+							Horario de cita correcto
+						</div>
+					</div>
+					<div class="col-sm-4 d-flex">
+						<div class="alert alert-info flex-grow-1">
+							Horario de cita es correcto, pero esta en el pasado.
+						</div>
+					</div>
+					<div class="col-sm-4 d-flex">
+						<div class="alert alert-warning flex-grow-1">
+							Horario de cita no cumple con agenda de CAT o se empalma con otra cita.
+						</div>
+					</div>
+				</div>
+				
+				<div class="calendar"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+				<button type="submit" class="btn btn-primary">Asignar</button>
+			</div>
+		</form>
+	</div>
+</div>
 
-        <div class="modal fade" id="modal-cambiar-usuario">
-            <div class="modal-dialog">
-                <div class="modal-content bg-default">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Cliente</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-							<label>Seleccione al cliente</label>
-							<select id="Cliente" class="form-control select2" name="Cliente" style="width: 100%; height: 40px;">
-								@foreach ($clientes as $cliente)
-								<option value="{{ $cliente->id }}" @if ($ticket->cliente_id == $cliente->id) selected @endif >{{ $cliente->condominio->nombre }} - {{ $cliente->numero_cliente }} / {{ $cliente->nombre }}</option>
-								@endforeach
+<!-- Modal -->
+<div class="modal fade" id="modal-valorar" tabindex="-1">
+	<div class="modal-dialog">
+		<form class="modal-content" method="post" id="form-valoracion">
+			@csrf()
+			<div class="modal-header">
+				<h5 class="modal-title"">Valorar falla</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Falla</label>
+							<p id="falla-valorar"></p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label for="valoracion">Procede garantía</label>
+							<select class="form-control" id="valoracion" name="valoracion">
+								<option value="Pendiente">Pendiente</option>
+								<option value="Si">Sí</option>
+								<option value="No">No</option>
 							</select>
 						</div>
-                    </div>
-                    <div class="modal-footer justify-content-between">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                        <button type="button" onclick="cambiarCliente()" class="btn btn-success" data-dismiss="modal">Cambiar</button>
-                    </div>
-                </div>
-                <!-- /.modal-content -->
-            </div>
-            <!-- /.modal-dialog -->
-        </div>
-
-        <div class="modal fade" id="modal-eliminar">
-            <div class="modal-dialog">
-                <div class="modal-content bg-warning">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Eliminar</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                    <p>¿Estás seguro que deseas eliminar el ticket del dictamen {{ $ticket->id }}?</p>
-                    </div>
-                    <div class="modal-footer justify-content-between">
-                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
-                    <form role="form" action="/tickets/{{ $ticket->id }}" method="post">
-						{{ csrf_field() }}
-						{{ method_field('DELETE') }}
-						<button type="submit" class="btn btn-outline-danger">Eliminar</button>
-					</form>
-                        <!-- <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Eliminar</button> -->
-                    </div>
-                </div>
-                <!-- /.modal-content -->
-            </div>
-            <!-- /.modal-dialog -->
-        </div>
+					</div>
+					<div class="col-sm-12">
+						<div class="form-group">
+							<label for="observacion">Observaciones</label>
+							<textarea class="form-control" name="observacion" id="observacion" rows="5"></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+				<button type="submit" class="btn btn-primary">Valorar</button>
+			</div>
+		</form>
 	</div>
-</section>
+</div>
+
+<div class="modal fade" id="modal-contratista" tabindex="-1">
+	<div class="modal-dialog modal-xl modal-dialog-scrollable">
+		<form class="modal-content" method="post" id="form-contratista">
+			@csrf()
+			<div class="modal-header">
+				<h5 class="modal-title">
+					Asignar contratista - 
+					<span id="falla-contratista"></span>
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body pt-0">
+				<div class="form-group mt-2">
+					<label for="select-contratista">Contratista</label>
+					<select class="form-control select-resource" id="select-contratista" name="contratista_id" required>
+						<option value="" selected disabled>Selecciona contratista</option>
+						@foreach($contratistas as $contratista)
+						<option value="{{ $contratista->id }}" @if(old('contratista_id') == $contratista['id']) selected @endif>
+							{{ $contratista->nombre }}
+						</option>
+						@endforeach
+					</select>
+					<input
+						class="event-start"
+						type="hidden"
+						name="agendado_desde"
+						value="{{ old('agendado_desde') }}"
+						required>
+					<input
+						class="event-end"
+						type="hidden"
+						name="agendado_hasta"
+						value="{{ old('agendado_hasta') }}"
+						required>
+				</div><!-- /.col -->
+				<div class="text-center text-muted mb-2">
+					Selecciona horario de trabajo en el calendario
+				</div>
+				<div class="row">
+					<div class="col-sm-4 d-flex">
+						<div class="alert alert-success flex-grow-1">
+							Horario de trabajo correcto.
+						</div>
+					</div>
+					<div class="col-sm-4 d-flex">
+						<div class="alert alert-info flex-grow-1">
+							Horario de trabajo es correcto, pero esta en el pasado.
+						</div>
+					</div>
+					<div class="col-sm-4 d-flex">
+						<div class="alert alert-warning flex-grow-1">
+							Horario de trabajo no cumple con agenda de contratista o se empalma con otro trabajo.
+						</div>
+					</div>
+				</div>
+				
+				<div class="calendar"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+				<button type="submit" class="btn btn-primary">Asignar</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-trabajo" tabindex="-1">
+	<div class="modal-dialog">
+		<form class="modal-content" method="post" id="form-trabajo">
+			@csrf()
+			@method('put')
+			<div class="modal-header">
+				<h5 class="modal-title">
+					Registrar trabajo - 
+					<span id="falla-trabajo"></span>
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Contratista</label>
+							<p id="contratista-trabajo"></p>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label for="valoracion">Finalizado</label>
+							<select class="form-control" id="finalizado-trabajo" name="finalizado">
+								<option value="0">No</option>
+								<option value="1">Sí</option>
+							</select>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label for="valoracion">Trabajado desde</label>
+							<div class="input-group" id="trabajado-desde" data-target-input="nearest">
+								<input type="text" name="trabajado_desde" class="form-control datetimepicker-input" data-target="#trabajado-desde" id="desde-trabajo" />
+								<div class="input-group-append" data-target="#trabajado-desde" data-toggle="datetimepicker">
+									<div class="input-group-text"><i class="fa fa-calendar"></i></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label for="valoracion">Trabajado hasta</label>
+							<div class="input-group" id="trabajado-hasta" data-target-input="nearest">
+								<input type="text" name="trabajado_hasta" class="form-control datetimepicker-input" data-target="#trabajado-hasta" id="hasta-trabajo" />
+								<div class="input-group-append" data-target="#trabajado-hasta" data-toggle="datetimepicker">
+									<div class="input-group-text"><i class="fa fa-calendar"></i></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+				<button type="submit" class="btn btn-primary">Registrar trabajo</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-eliminar-contratista" tabindex="-1">
+	<div class="modal-dialog">
+		<form class="modal-content" method="post" id="form-eliminar-contratista">
+			@csrf()
+			@method('delete')
+			<div class="modal-header bg-danger">
+				<h5 class="modal-title">
+					Eliminar asignacion falla - contratista
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<p>
+					¿En verdad desea eliminar la asignación de la falla
+					<strong class="text-danger" id="falla-eliminar-contratista"></strong> de el/la contratista
+					<strong class="text-danger" id="eliminar-contratista"></strong>?
+				</p>
+				<p>
+					Esta accion no podrá ser revertida.
+				</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+				<button type="submit" class="btn btn-danger">Eliminar</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-eliminar" tabindex="-1">
+	<div class="modal-dialog">
+		<form class="modal-content" action="{{ route('tickets.destroy', $ticket->id) }}" method="post" id="form-eliminar">
+			@csrf()
+			@method('delete')
+			<div class="modal-header bg-danger">
+				<h5 class="modal-title">
+					Eliminar ticket
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<p>
+					¿En verdad desea eliminar el ticket con folio #{{ $ticket->id }}?
+				</p>
+				<p>
+					Esta accion no podrá ser revertida.
+				</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+				<button type="submit" class="btn btn-danger">Eliminar</button>
+			</div>
+		</form>
+	</div>
+</div>
+
 @endsection
 
 @push('scripts')
-<script src="{{ url('/plugins/bs-custom-file-input/bs-custom-file-input.min.js') }}"></script>
-<script src="{{ url('/plugins/moment/moment.min.js') }}"></script>
-<script src="{{ url('/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
-<script src="{{ url('/plugins/toastr/toastr.min.js') }}"></script>
-<script src="{{ url('/plugins/select2/js/select2.full.min.js') }}"></script>
-<script type="text/javascript">
-$(document).ready(function () {
-	bsCustomFileInput.init();
+<script src="{{ asset('/plugins/moment/moment.min.js') }}"></script>
+<script src="{{ asset('/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5/locales-all.min.js"></script>
+<script>
+$(window).on('load', function () {
+	$('#trabajado-desde, #trabajado-hasta').datetimepicker({
+		format: 'YYYY-MM-DD HH:mm',
+		stepping: 30,
+		locale: 'es',
+		useCurrent: false,
+		sideBySide: true,
+	});
+
+	$('#modal-valorar').on('shown.bs.modal', function (event) {
+		const button = $(event.relatedTarget); // Button that triggered the modal
+		const action      = button.data('action'); // Extract info from data-* attributes
+		const falla       = button.data('falla');
+		const valoracion  = button.data('valoracion');
+		const observacion = button.data('observacion');
+
+		const modal = $(this);
+		modal.find('#form-valoracion').attr('action', action);
+  		modal.find('#falla-valorar').text(falla);
+  		modal.find('#valoracion').val(valoracion);
+  		modal.find('#observacion').val(observacion);
+	});
+
+	$('#modal-contratista').on('shown.bs.modal', function (event) {
+		const button = $(event.relatedTarget); // Button that triggered the modal
+		const action      = button.data('action'); // Extract info from data-* attributes
+		const falla       = button.data('falla');
+
+		const modal = $(this);
+		modal.find('#form-contratista').attr('action', action);
+  		modal.find('#falla-contratista').text(falla);
+	});
+
+	$('#modal-trabajo').on('shown.bs.modal', function (event) {
+		const button = $(event.relatedTarget); // Button that triggered the modal
+		const action = button.data('action'); // Extract info from data-* attributes
+		const falla = button.data('falla');
+		const desde = button.data('desde');
+		const hasta = button.data('hasta');
+		const contratista = button.data('contratista');
+
+		const modal = $(this);
+		modal.find('#form-trabajo').attr('action', action);
+  		modal.find('#falla-trabajo').text(falla);
+  		modal.find('#contratista-trabajo').text(contratista);
+  		modal.find('#finalizado-trabajo').val('1');
+  		modal.find('#desde-trabajo').val(desde);
+  		modal.find('#hasta-trabajo').val(hasta);
+	});
+
+	$('#modal-eliminar-contratista').on('shown.bs.modal', function (event) {
+		const button = $(event.relatedTarget); // Button that triggered the modal
+		const action = button.data('action'); // Extract info from data-* attributes
+		const falla = button.data('falla');
+		const contratista = button.data('contratista');
+
+		const modal = $(this);
+		modal.find('#form-eliminar-contratista').attr('action', action);
+  		modal.find('#falla-eliminar-contratista').text(falla);
+  		modal.find('#eliminar-contratista').text(contratista);
+	});
 });
+</script>
+<script>
+$(window).on('load', function () {
+	const coordinadores = @json($cats->keyBy('id'));
+	const oldEventCoordinador = {
+		start: '{{ old('cita_cat') }}',
+		end: '{{ old('cita_cat_fin') }}',
+	};
 
-$('.select2').select2()
+	const contratistas = @json($contratistas->keyBy('id'));
+	const oldEventContratista = {
+		start: '{{ old('cita_cat') }}',
+		end: '{{ old('cita_cat_fin') }}',
+	};
 
-$(function () {
-	$('#cita').datetimepicker({
-		format: 'L',
-		locale: 'es'
-    });
-    
-    $('#Fecha_reporte').datetimepicker({
-		format: 'L',
-		locale: 'es'
+	setUpCalendar({
+		modalSelector: '#modal-cat',
+		fetchUrl: '{{ route('schedules.coordinador') }}',
+		eventId: '{{ $ticket->id }}',
+		eventTitle: '#{{ $ticket->id }}',
+		prevEvent: oldEventCoordinador,
+		resources: coordinadores,
+		initialDate:'{{ old('cita_cat', $ticket->cita_cat) }}' || undefined,
 	});
 
-    $('#Atencion1').datetimepicker({
-		locale: 'es',
-        format: 'L h:mm A',
-        sideBySide: true
+	setUpCalendar({
+		modalSelector: '#modal-contratista',
+		fetchUrl: '{{ route('schedules.contratista') }}',
+		eventId: new Date().getTime(),
+		eventTitle: '#{{ $ticket->id }}',
+		prevEvent: oldEventContratista,
+		resources: contratistas,
 	});
 
-    $('#Atencion2').datetimepicker({
-		locale: 'es',
-        format: 'L h:mm A',
-        sideBySide: true
-	});
+	function setUpCalendar({ modalSelector, fetchUrl, eventId, eventTitle, prevEvent, resources, initialDate }) {
+		const modal = $(modalSelector);
+		const calendar = new FullCalendar.Calendar(modal.find('.calendar').get(0), {
+			themeSystem: 'bootstrap',
+			initialView: 'timeGridWeek',
+			locale: 'es',
+			firstDay: 0,
+			allDaySlot: false,
+			forceEventDuration: true,
+			defaultTimedEventDuration: '0:30',
+			stickyHeaderDates: true,
+			nowIndicator: true,
+			eventResize({ event }) {
+				onEventChange(event);
+			},
+			eventDrop({ event }) {
+				onEventChange(event);
+			},
+			eventClassNames ({ event, isPast }) {
+				if (!event.startEditable) {
+					return ['alert-secondary'];
+				}
+				if(isOverlapping(event) || isNotBusinessHour(event)) {
+					return ['alert-warning'];
+				}
+				if (isPast) {
+					return ['alert-info'];
+				}
+				return ['alert-success'];
+			},
+			initialDate,
+		});
 
-    $('#Atencion3').datetimepicker({
-		locale: 'es',
-        format: 'L h:mm A',
-        sideBySide: true
-	});
+		modal.on('shown.bs.modal', function () {
+			calendar.render();
+			modal.find('.select-resource').trigger('change');
+		});
+
+		modal.find('.select-resource').on('change', function () {
+			const resId = this.value;
+			calendar.setOption('businessHours', resources[resId] && resources[resId].working_hours);
+			calendar.setOption('events', fetchEvents(resId));
+			calendar.setOption('dateClick', dateClickHandler(resId));
+		});
+
+		const fetchEvents = (resId) => {
+			if (!resId) {
+				onEventChange();
+				return [];
+			}
+			return (info, successCallback, failureCallback) => {
+				$.ajax({
+					type: 'GET',
+					url: fetchUrl,
+					data: {
+						start: info.startStr,
+						end: info.endStr,
+						resource_id: resId,
+					},
+					success(response) {
+						const event = prevEvent.start
+							? prevEvent
+							: response.find((event) => event.id == eventId);
+						const items = response.filter((event) => event.id != eventId);
+
+						if (event) {
+							Object.assign(event, {
+								id: eventId,
+								title: eventTitle,
+								start: new Date(event.start),
+								end: new Date(event.end),
+								editable: true,
+								durationEditable: true,
+							});
+							items.push(event);
+							onEventChange(event);
+						}
+						successCallback(items);
+					},
+					error: failureCallback,
+				});
+			};
+		};
+
+		const dateClickHandler = (resId) => {
+			if (!resId) {
+				return null;
+			}
+			return function(info) {
+				let event = calendar.getEvents().find((e) => e.id == eventId);
+				if (!event) {
+					event = calendar.addEvent({
+						id: eventId,
+						title: eventTitle,
+						start: info.date,
+						editable: true,
+						durationEditable: true,
+					}, true);
+				} else {
+					event.setStart(info.date, { maintainDuration: true });
+				}
+				onEventChange(event);
+			};
+		};
+
+		const isNotBusinessHour = (event) => {
+			let businessHours = calendar.getOption('businessHours');
+			if (!businessHours) {
+				return false;
+			}
+			if(!(businessHours instanceof Array)) {
+				businessHours = [businessHours];
+			}
+			const day = event.start.getDay();
+			const start = event.start.toTimeString().slice(0, 5);
+			const end = event.end.toTimeString().slice(0, 5);
+			return !businessHours.some(
+				(info) => info.daysOfWeek.includes(day) && start >= info.startTime && end <= info.endTime
+			);
+		}
+
+		const isOverlapping = (event) => {
+			const events = calendar.getEvents();
+			return events.some((e) => {
+				if (e.id == event.id) {
+					return false;
+				}
+				const e1start = e.start.getTime();
+				const e1end = e.end.getTime();
+				const e2start = event.start.getTime();
+				const e2end = event.end.getTime();
+				return (e1start >= e2start && e1start < e2end || e2start >= e1start && e2start < e1end);
+			});
+		}
+
+		const onEventChange = (event = null) => {
+			const start = event ? formatDate(event.start) : '';
+			const end = event ? formatDate(event.end) : '';
+			modal.find('.event-start').val(start);
+			modal.find('.event-end').val(end);
+		};
+
+		const formatDate = (date) =>
+			date.getFullYear() + "-" +
+			("00" + (date.getMonth() + 1)).slice(-2) + "-" +
+			("00" + date.getDate()).slice(-2) + " " +
+			("00" + date.getHours()).slice(-2) + ":" +
+			("00" + date.getMinutes()).slice(-2) + ":" +
+			("00" + date.getSeconds()).slice(-2);
+	}
 });
-
-let detalleId = null;
-let filaDetalle = null;
-
-function observaciones(detalle_id, key) {
-    const opcionContratista = document.querySelector('#Contratistas');
-    const opcionValoracion = document.querySelector('#Valoracion');
-    const opcionEstado = document.querySelector('#Estados');
-    const opcionObservacion = document.querySelector('#Observaciones');
-    const opcionUbicaciones = document.querySelector('#Ubicaciones');
-
-    filaDetalle = key;
-    detalleId = detalle_id;
-
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-	$.ajax({
-		url: '/detallesTicket/detalle',
-		data: { 'id': detalle_id },
-		type: 'POST',
-		success: (response) => {
-            let detalle = response.detalle
-            console.log(response.detalle)
-            if(detalle.contratista_id != null) {
-                opcionContratista.options.namedItem(`cont_${detalle.contratista_id}`).selected = true;
-            } else {
-                opcionContratista.options.namedItem('none').selected = true;
-            }
-            opcionValoracion.options.namedItem(detalle.valoracion).selected = true;
-            opcionEstado.options.namedItem(detalle.estado).selected = true;
-            opcionObservacion.value = detalle.observacion
-
-            if(detalle.ubicacion_id != null) {
-                opcionUbicaciones.options.namedItem(`cont_${detalle.ubicacion_id}`).selected = true;
-            } else {
-                opcionUbicaciones.options.namedItem('none').selected = true;
-            }
-		},
-		error: (error) => {
-			toastr.error('Ocurrió un error inesperado.')
-		}
-	});
-}
-
-function agregarObservaciones() {
-    const observacion = document.querySelector('#Observaciones').value;
-
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-	$.ajax({
-		url: '/detallesTicket/setObservacion',
-		data: { 'id': detalleId, 'observacion': observacion },
-		type: 'POST',
-		success: (response) => {
-			toastr.info(response.mensaje)
-		},
-		error: (error) => {
-			toastr.error('Ocurrió un error inesperado.')
-		}
-	});
-}
-
-function asignarCat() {
-    const ticketid = document.querySelector('#ticket_id').value;
-    const seleccionado = document.querySelector('#cats').value;
-
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-	$.ajax({
-		url: '/tickets/setCat',
-		data: { 'id': ticketid, 'catSeleccionado': seleccionado },
-		type: 'POST',
-		success: (response) => {
-			toastr.info(response.mensaje)
-		},
-		error: (error) => {
-			toastr.error('Ocurrió un error inesperado.')
-		}
-	});
-}
-
-function asignarCita() {
-    const ticketid = document.querySelector('#ticket_id').value;
-    const cita = document.querySelector('#cita-input').value;
-
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-	$.ajax({
-		url: '/tickets/setCita',
-		data: { 'id': ticketid, 'cita': cita },
-		type: 'POST',
-		success: (response) => {
-            console.log(response);
-			toastr.info(response.mensaje)
-		},
-		error: (error) => {
-            console.log(error);
-			toastr.error('Ocurrió un error inesperado.')
-		}
-	});
-}
-
-function asignarAtencion(numeroCita) {
-    const ticketid = document.querySelector('#ticket_id').value;
-    const citaAtencion = document.querySelector(`#Atencion${numeroCita}-input`).value;
-
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-	$.ajax({
-		url: '/tickets/setCitaAtencion',
-		data: { 'id': ticketid, 'citaAtencion': citaAtencion, 'numeroCita': numeroCita},
-		type: 'POST',
-		success: (response) => {
-            console.log(response);
-			toastr.info(response.mensaje)
-		},
-		error: (error) => {
-            console.log(error);
-			toastr.error('Ocurrió un error inesperado.')
-		}
-	});
-}
-
-function asignarFechaReporte() {
-    const ticketid = document.querySelector('#ticket_id').value;
-    const fechaReporte = document.querySelector(`#Fecha_reporte-input`).value;
-
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-	$.ajax({
-		url: '/tickets/setFechaReporte',
-		data: { 'id': ticketid, 'fechaReporte': fechaReporte},
-		type: 'POST',
-		success: (response) => {
-            console.log(response);
-			toastr.info(response.mensaje)
-		},
-		error: (error) => {
-            console.log(error);
-			toastr.error('Ocurrió un error inesperado.')
-		}
-	});
-}
-
-function agregarPrototipo() {
-    const ticketid = document.querySelector('#ticket_id').value;
-    const prototipo = document.querySelector('#Prototipo').value;
-
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-	$.ajax({
-		url: '/tickets/setPrototipo',
-		data: { 'id': ticketid, 'prototipo': prototipo },
-		type: 'POST',
-		success: (response) => {
-			toastr.info(response.mensaje)
-		},
-		error: (error) => {
-			toastr.error('Ocurrió un error inesperado.')
-		}
-	});
-}
-
-function cambiarValoracion() {
-    const seleccionado = document.querySelector('#Valoracion').selectedOptions[0].value;
-
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-	$.ajax({
-		url: '/detallesTicket/changeValoracion',
-		data: { 'id': detalleId, 'valoracion': seleccionado },
-		type: 'POST',
-		success: (response) => {
-            toastr.info(response.mensaje)
-            location.reload();
-		},
-		error: (error) => {
-            console.log(error)
-			toastr.error('Ocurrió un error inesperado.')
-		}
-    });
-
-    actualizarValoracion(seleccionado, filaDetalle);
-}
-
-
-function cambiarUbicacion() {
-    const seleccionado = document.querySelector('#Ubicaciones').selectedOptions[0].value;
-
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-	$.ajax({
-		url: '/detallesTicket/setUbicacion',
-		data: { 'id': detalleId, 'ubicacion': seleccionado },
-		type: 'POST',
-		success: (response) => {
-            console.log(response)
-            toastr.info(response.mensaje)
-		},
-		error: (error) => {
-            console.log(error)
-			toastr.error('Ocurrió un error inesperado.')
-		}
-    });
-}
-
-
-function cambiarEstado() {
-    const seleccionado = document.querySelector('#Estados').selectedOptions[0].value;
-
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-	$.ajax({
-		url: '/detallesTicket/changeEstado',
-		data: { 'id': detalleId, 'estado': seleccionado },
-		type: 'POST',
-		success: (response) => {
-			toastr.info(response.mensaje)
-            location.reload();
-		},
-		error: (error) => {
-			toastr.error('Ocurrió un error inesperado.')
-		}
-    });
-
-    actualizarEstado(seleccionado, filaDetalle);
-}
-
-function asignarContratista() {
-    const seleccionado = document.querySelector('#Contratistas').selectedOptions[0].value;
-
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-	$.ajax({
-		url: '/detallesTicket/setCont',
-		data: { 'id': detalleId, 'contSeleccionado': seleccionado },
-		type: 'POST',
-		success: (response) => {
-            console.log(response)
-			toastr.info(response.mensaje)
-		},
-		error: (error) => {
-            console.log(error)
-			toastr.error('Ocurrió un error inesperado.')
-		}
-    });
-    actualizarContratista(document.querySelector('#Contratistas').selectedOptions[0].textContent, filaDetalle);
-}
-
-function actualizarValoracion(valoracion, filaDetalle){
-    document.querySelector('#example1').rows[filaDetalle].cells[4].textContent = valoracion;
-}
-
-function actualizarEstado(estado, filaDetalle){
-    document.querySelector('#example1').rows[filaDetalle].cells[5].textContent = estado;
-}
-
-function actualizarContratista(cont, filaDetalle){
-    if(cont == 'none'){
-        cont = 'Sin asignar';
-    }
-    document.querySelector('#example1').rows[filaDetalle].cells[6].textContent = cont;
-}
-
-function notReload(e){
-    e.preventDefault();
-}
-
-function cambiarCliente() {
-    const cliente = document.querySelector('#Cliente').value
-
-    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
-	$.ajax({
-		url: '/detallesTicket/cambiarCliente',
-		data: { 'id': {{ $ticket->id }}, 'cliente': cliente },
-		type: 'POST',
-		success: (response) => {
-			toastr.info(response.mensaje)
-            location.reload();
-		},
-		error: (error) => {
-            console.log(error)
-			toastr.error('Ocurrió un error inesperado.')
-		}
-	});
-}
 </script>
 @endpush

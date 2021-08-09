@@ -12,23 +12,20 @@
 	<div class="container-fluid">
 		<div class="row mb-2">
 			<div class="col-sm-6">
-				<h1 class="m-0 text-dark">Gestion de tickets</h1>
+				<h1 class="m-0 text-dark">Listado de tickets</h1>
 			</div><!-- /.col -->
 			<div class="col-sm-6">
 				<ol class="breadcrumb float-sm-right">
+					@can('create', 'App\Models\Ticket')
 					<li class="breadcrumb-item">
-						<a href="/tickets/create">
-							<button type="button" class="btn btn-block btn-primary">Registrar ticket</button>
+						<a href="{{ route('tickets.create') }}">
+							<button type="button" class="btn btn-block btn-primary">Crear ticket</button>
 						</a>
 					</li>
+					@endcan
 				</ol>
 			</div><!-- /.col -->
 		</div><!-- /.row -->
-		@if (session()->has('message'))
-		<div class="alert alert-info">
-			{{ session('message') }}
-		</div>
-		@endif
 		@if ($errors->any())
 		<div class="alert alert-danger">
 			<ul>
@@ -49,36 +46,87 @@
 		<div class="col-12">
 			<div class="card">
 				<div class="card-body">
+					<form class="form-inline">
+						<div class="input-group mb-3 mr-3">
+							<div class="input-group-prepend">
+								<i class="input-group-text nav-icon fas fa-search"></i>
+							</div>
+							<input type="text" class="form-control" placeholder="Buscar..." name="buscar" value="{{ request('buscar')  }}">
+						</div>
+						<div class="input-group mb-3 mr-3">
+							<div class="input-group-prepend">
+								<label class="input-group-text" for="condominio">Condominio</label>
+							</div>
+							<select class="custom-select" id="condominio" name="condominio_id">
+								<option value="" selected>Todos</option>
+								@foreach ($condominios as $condominio)
+								<option value="{{ $condominio->id }}" {{ request('condominio_id') == $condominio['id'] ? 'selected' : '' }}>
+									{{ $condominio->nombre }}
+								</option>
+								@endforeach
+							</select>
+						</div>
+						<div class="input-group mb-3 mr-3">
+							<div class="input-group-prepend">
+								<label class="input-group-text" for="estado">Estado</label>
+							</div>
+							<select class="custom-select" id="estado" name="estado">
+								<option value="" selected>Todos</option>
+								@foreach ($estados as $value => $label)
+								<option value="{{ $value }}" {{ request('estado', -1) == $value ? 'selected' : '' }}>
+									{{ $label }}
+								</option>
+								@endforeach
+							</select>
+						</div>
+						<div class="mb-3 flex-grow-1 text-right">
+							<button type="submit" class="btn btn-secondary">Buscar</button>
+						</div>
+					</form>
 					<table id="example1" class="table no-padding table-hover table-striped">
 						<thead>
 						<tr>
-							<th>#</th>
-							<th>Dictamen</th>
-							@if ( auth()->user()->type != 'cliente' )
+							<th>Folio</th>
+							@unless ( auth()->user()->es_cliente )
+							<th>Condominio</th>
+							<th>No. Cliente</th>
 							<th>Cliente</th>
-							@endif
-							<th>Fecha</th>
+							@endunless
+							@unless ( auth()->user()->es_coordinador )
+							<th>CAT</th>
+							@endunless
+							<th>Fecha de reporte</th>
 							<th>Estado</th>
 							<th style="width: 100px;"></th>
 						</tr>
 						</thead>
 						<tbody>
 
-						@foreach ($tickets as $key => $ticket)
+						@foreach ($tickets as $ticket)
 						<tr>
-							<td>{{ $key + 1 }}</td>
 							<td>{{ $ticket->id }}</td>
-							@if ( auth()->user()->type != 'cliente' )
+							@unless ( auth()->user()->es_cliente )
+							<td>{{ $ticket->condominio?->nombre }}</td>
+							<td>{{ $ticket->cliente->numero_cliente }}</td>
 							<td>{{ $ticket->cliente->nombre }}</td>
-							@endif
-							<td>{{ date('Y-m-d', strtotime($ticket->created_at)) }}</td>
-							<td>{{ $ticket->estado }}</td>
-							<td><a href="/tickets/{{ $ticket->id }}"><button type="button" class="btn btn-block btn-info">Detalle</button></a></td>
+							@endunless
+							@unless ( auth()->user()->es_coordinador )
+							<td>{{ $ticket->coordinador?->nombre ?? 'Sin asignar' }}</td>
+							@endunless
+							<td>{{ $ticket->created_at->format('d/m/Y') }}</td>
+							<td>{{ $ticket->nombre_estado }}</td>
+							<td>
+								<a class="btn btn-info" href="{{ route('tickets.show', $ticket->id) }}">
+									Ver
+								</a>
+							</td>
 						</tr>
 						@endforeach
-
 						</tbody>
 					</table>
+					<div class="pull-right mt-3">
+						{{ $tickets->render() }}
+					</div>
 				</div>
 				<!-- /.card-body -->
 			</div>
@@ -99,10 +147,10 @@
 <script>
   $(function () {
     $('#example1').DataTable({
-      "paging": true,
+      "paging": false,
       "lengthChange": true,
-      "searching": true,
-      "ordering": true,
+      "searching": false,
+      "ordering": false,
       "info": false,
       "autoWidth": false,
 			"responsive": true,

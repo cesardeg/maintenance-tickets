@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Familia;
+use App\Models\Familia;
 
 use Illuminate\Http\Request;
 
@@ -9,10 +9,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        if(auth()->user()->type != 'user'){
-            return redirect("/tickets");
-        }
-        return view('general.index');
+        return redirect("/tickets");
     }
 
     public function test()

@@ -1,26 +1,45 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\User;
-use App\Cliente;
-use App\Condominio;
-use App\Ticket;
+use App\Models\User;
+use App\Models\Cliente;
+use App\Models\Condominio;
+use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ClienteController extends Controller
 {
     /**
+     * Create the controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->authorizeResource(Cliente::class, 'cliente');
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $clientes = Cliente::where('status', 'active')->get();
+        $condominios = Condominio::all();
+        $qry = Cliente::with('condominio', 'user')->where('status', 'active')->latest();
+        if ($request->buscar) {
+            $qry->buscar($request->buscar);
+        }
+        if ($request->condominio_id) {
+            $qry->where('clientes.condominio_id', $request->condominio_id);
+        }
+        $clientes = $qry->paginate()->appends($request->all());
 
         return view('clientes.index', array(
-            'clientes' => $clientes
+            'clientes' => $clientes,
+            'condominios' => $condominios,
         ));
     }
 
@@ -51,20 +70,14 @@ class ClienteController extends Controller
             "Condominio" => "required|string",
             "Numero_cliente" => "required|string",
             "Nombre_completo" => "required|string",
-            "Coopropietario" => "required|string",
-            "Correo" => "email|required|string",
+            "Coopropietario" => "nullable|string",
+            "Correo" => "required|email|unique:users,email",
             "Telefono" => "required|numeric",
-            "Fecha_escrituracion" => "required|string",
-            "Fecha_poliza" => "required|string",
-            "Fecha_entrega" => "required|string",
-            "Comentarios" => "string"
+            "Fecha_escrituracion" => "required|date_format:Y-m-d",
+            "Fecha_poliza" => "required||date_format:Y-m-d",
+            "Fecha_entrega" => "required||date_format:Y-m-d",
+            "Comentarios" => "nullable|string"
         ]);
-
-        $emailExist = User::where('email', $request->Correo)->first();
-        if ($emailExist) {
-            return back()->withErrors(['Esta cuenta de correo ya fue registrada'])
-                ->withInput(request(['Desarrollador', 'Municipio', 'Condominio', 'Numero_cliente', 'Nombre_completo', 'Coopropietario', 'Correo', 'Telefono', 'Fecha_escrituracion', 'Fecha_poliza', 'Fecha_entrega', 'Comentarios']));
-        }
 
         DB::transaction(function () use ($request) {
             $user = new User();
@@ -100,9 +113,8 @@ class ClienteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Cliente $cliente)
     {
-        $cliente = Cliente::findOrFail($id);
         $tickets = Ticket::where(array(
             ['cliente_id', $cliente->id],
             ['estado', '<>', 'cancelada'],
@@ -120,9 +132,8 @@ class ClienteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Cliente $cliente)
     {
-        $cliente = Cliente::findOrFail($id);
         $condominios = Condominio::get();
 
         return view('clientes.edit', array(
@@ -138,23 +149,21 @@ class ClienteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Cliente $cliente)
     {
-        $cliente = Cliente::findOrFail($id);
-
         $validator = $this->validate($request, [
             "Desarrollador" => "required|string",
             "Municipio" => "required|string",
             "Condominio" => "required|string",
             "Numero_cliente" => "required|string",
             "Nombre_completo" => "required|string",
-            "Coopropietario" => "required|string",
+            "Coopropietario" => "nullable|string",
             "Correo" => "email|required|string",
             "Telefono" => "required|numeric",
             "Fecha_escrituracion" => "required|string",
             "Fecha_poliza" => "required|string",
             "Fecha_entrega" => "required|string",
-            "Comentarios" => "string"
+            "Comentarios" => "nullable|string"
         ]);
 
         if ($request->Correo != $cliente->user->email) {
@@ -192,9 +201,8 @@ class ClienteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Cliente $cliente)
     {
-        $cliente = Cliente::findOrFail($id);
         $cliente->status = 'inactive';
         $cliente->save();
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -8,7 +8,8 @@ class Ubicacion extends Model
 {
     protected $table = 'ubicaciones';
 
-    public function detalle() {
-        return $this->hasOne('App\DetalleTicket');
+    public function detalle()
+    {
+        return $this->hasOne(DetalleTicket::class);
     }
 }

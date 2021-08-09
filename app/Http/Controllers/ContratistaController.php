@@ -4,13 +4,24 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\User;
-use App\AgendaTc;
-use App\AgendaCat;
-use App\Contratista;
+use App\Models\User;
+use App\Models\AgendaTc;
+use App\Models\AgendaCat;
+use App\Models\Contratista;
+use App\Http\Requests\ContratistaStore;
 
 class ContratistaController extends Controller
 {
+    /**
+     * Create the controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->authorizeResource(Contratista::class, 'contratista');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -41,49 +52,27 @@ class ContratistaController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ContratistaStore $request)
     {
-        $validator = $this->validate($request, [
-            "Desarrollador" => "required|string",
-            "Municipio" => "required|string",
-            "Proyecto" => "required|string",
-            "Numero_contratista" => "required|integer",
-            "Empresa_contratista" => "required|string",
-            "Nombre_responsable" => "required|string",
-            "Correo" => "email|required|string",
-            "Telefono" => "required|numeric",
-            "Fecha_producto_a_obra" => "required|string",
-            "Fecha_producto_a_vivienda" => "required|string",
-            "Cat_asignado" => "required|string"
-        ]);
+        DB::beginTransaction();
 
-        $emailExist = User::where('email', $request->Correo)->first();
-        if ($emailExist) {
-            return back()->withErrors(['Esta cuenta de correo ya fue registrada'])
-                ->withInput(request(['Desarrollador', 'Municipio', 'Proyecto', 'Numero_contratista', 'Empresa_contratista', 'Nombre_responsable', 'Correo', 'Telefono', 'Fecha_producto_a_obra', 'Fecha_producto_a_vivienda', 'Cat_asignado']));
-        }
+        $user = new User();
+        $user->email = $request->correo;
+        $user->type = 'contratista';
+        $user->password = bcrypt($request->numero_contratista);
+        $user->save();
 
-        DB::transaction(function () use ($request) {
-            $user = new User();
-            $user->email = $request->Correo;
-            $user->type = 'contratista';
-            $user->password = bcrypt($request->Numero_contratista);
-            $user->save();
+        $agenda_tc = new AgendaTc();
+        $agenda_tc = self::agenda_tc($agenda_tc, $request);
+        $agenda_tc->save();
 
-            $agenda_tc = new AgendaTc();
-            $agenda_tc = self::agenda_tc($agenda_tc, $request);
-            $agenda_tc->save();
+        $contratista = new Contratista();
+        $contratista = self::contratista($request, $contratista, $user, $agenda_tc);
+        $contratista->save();
+    
+        DB::commit();
 
-            $agenda_cat = new AgendaCat();
-            $agenda_cat = self::agenda_cat($agenda_cat, $request);
-            $agenda_cat->save();
-
-            $contratista = new Contratista();
-            $contratista = self::contratista($contratista, $user, $agenda_tc, $agenda_cat, $request);
-            $contratista->save();
-        });
-
-        return redirect('/contratistas')
+        return redirect()->route('contratistas.show', $contratista->id)
                     ->with('message', 'Se ha registrado al contratista correctamente');
     }
 
@@ -93,9 +82,8 @@ class ContratistaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Contratista $contratista)
     {
-        $contratista = Contratista::findOrFail($id);
         return view('contratistas.show', array(
             'contratista' => $contratista
         ));
@@ -107,9 +95,8 @@ class ContratistaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Contratista $contratista)
     {
-        $contratista = Contratista::findOrFail($id);
         return view('contratistas.edit', array(
             'contratista' => $contratista
         ));
@@ -122,48 +109,23 @@ class ContratistaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ContratistaStore $request, Contratista $contratista)
     {
-        $contratista = Contratista::findOrFail($id);
         $user = User::findOrFail($contratista->user_id);
 
-        $validator = $this->validate($request, [
-            "Desarrollador" => "required|string",
-            "Municipio" => "required|string",
-            "Proyecto" => "required|string",
-            "Numero_contratista" => "required|integer",
-            "Empresa_contratista" => "required|string",
-            "Nombre_responsable" => "required|string",
-            "Correo" => "email|required|string",
-            "Telefono" => "required|numeric",
-            "Fecha_producto_a_obra" => "required|string",
-            "Fecha_producto_a_vivienda" => "required|string",
-            "Cat_asignado" => "required|string"
-        ]);
-
-        if ($request->Correo != $contratista->user->email) {
-            $emailExist = User::where('email', $request->Correo)->first();
-            if ($emailExist) {
-                return back()->withErrors(['Esta cuenta de correo ya fue registrada'])
-                    ->withInput(request(['Desarrollador', 'Municipio', 'Proyecto', 'Numero_contratista', 'Empresa_contratista', 'Nombre_responsable', 'Correo', 'Telefono', 'Fecha_producto_a_obra', 'Fecha_producto_a_vivienda', 'Cat_asignado']));
-            } else {
-                $user->email = $request->Correo;
-                $user->update();
-            }
+        if ($request->correo != $contratista->user->email) {
+            $user->email = $request->correo;
+            $user->update();
         }
 
         $agenda_tc = AgendaTc::findOrFail($contratista->agenda_tc_id);
         $agenda_tc = self::agenda_tc($agenda_tc, $request);
         $agenda_tc->update();
 
-        $agenda_cat = AgendaCat::findOrFail($contratista->agenda_cat_id);
-        $agenda_cat = self::agenda_cat($agenda_cat, $request);
-        $agenda_cat->update();
-
-        $contratista = self::contratista($contratista, $user, $agenda_tc, $agenda_cat, $request);
+        $contratista = self::contratista($request, $contratista, $user, $agenda_tc);
         $contratista->update();
 
-        return redirect('/contratistas')
+        return redirect()->route('contratistas.show', $contratista->id)
                     ->with('message', 'Se ha actualizado al contratista correctamente');
     }
 
@@ -173,9 +135,8 @@ class ContratistaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Contratista $contratista)
     {
-        $contratista = Contratista::findOrFail($id);
         $contratista->status = 'inactive';
         $contratista->save();
 
@@ -183,21 +144,20 @@ class ContratistaController extends Controller
                     ->with('message', 'Se ha eliminado al contratista correctamente');
     }
 
-    private static function contratista($contratista, $user, $agenda_tc, $agenda_cat, $request)
+    private static function contratista($request, $contratista, $user, $agenda_tc)
     {
         $contratista->user_id = $user->id;
-        $contratista->desarrollador = $request->Desarrollador;
-        $contratista->municipio = $request->Municipio;
-        $contratista->proyecto = $request->Proyecto;
-        $contratista->numero_contratista = $request->Numero_contratista;
-        $contratista->empresa = $request->Empresa_contratista;
-        $contratista->nombre = $request->Nombre_responsable;
-        $contratista->telefono = $request->Telefono;
-        $contratista->fecha_producto_obra = $request->Fecha_producto_a_obra;
-        $contratista->fecha_producto_vivienda = $request->Fecha_producto_a_vivienda;
-        $contratista->coordinador = $request->Cat_asignado;
+        $contratista->desarrollador = $request->desarrollador;
+        $contratista->municipio = $request->municipio;
+        $contratista->proyecto = $request->proyecto;
+        $contratista->numero_contratista = $request->numero_contratista;
+        $contratista->empresa = $request->empresa;
+        $contratista->nombre = $request->nombre;
+        $contratista->telefono = $request->telefono;
+        $contratista->fecha_producto_obra = $request->fecha_producto_obra;
+        $contratista->fecha_producto_vivienda = $request->fecha_producto_vivienda;
+        $contratista->coordinador = $request->coordinador;
         $contratista->agenda_tc_id = $agenda_tc->id;
-        $contratista->agenda_cat_id = $agenda_cat->id;
 
         return $contratista;
     }

@@ -21,7 +21,7 @@ class LoginController extends Controller
             'password' => 'required|string'
         ]);
 
-        if (Auth::attempt($validator)) {
+        if (Auth::attempt($validator, request('remember') == 1)) {
             return redirect()->route('dashboard');
         }
 

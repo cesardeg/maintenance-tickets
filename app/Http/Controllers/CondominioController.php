@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Condominio;
+use App\Models\Condominio;
 
 class CondominioController extends Controller
 {

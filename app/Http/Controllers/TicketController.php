@@ -2,58 +2,65 @@
 
 namespace App\Http\Controllers;
 
-use App\Cliente;
-use App\Condominio;
-use App\Contratista;
-use App\Coordinador;
-use App\DetalleTicket;
-use App\Encuesta;
-use App\Falla;
-use App\Familia;
-use App\Ticket;
-use App\Ubicacion;
+use App\Models\Cliente;
+use App\Models\Condominio;
+use App\Models\Contratista;
+use App\Models\Coordinador;
+use App\Models\DetalleTicket;
+use App\Models\Encuesta;
+use App\Models\Falla;
+use App\Models\Familia;
+use App\Models\Ticket;
+use App\Models\TicketStatus;
+use App\Models\Ubicacion;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use App\Http\Requests\TicketStore;
+use App\Http\Requests\TicketCoordinadorUpdate;
 use PDF;
 
 class TicketController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Ticket::class, 'ticket');
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        if (auth()->user()->type == 'cliente') {
-            $tickets = Ticket::where(array(
-                ['cliente_id', auth()->user()->cliente->id],
-                ['estado', '<>', 'Cancelada'],
-            ))->get();
+        $user = auth()->user();
+        $qry = Ticket::with('condominio', 'cliente')->latest();
 
-            $encuesta = Ticket::where('cliente_id', auth()->user()->cliente->id)
-                ->with(['encuestas' => function ($query) {
-                    return $query->where('active', 1);
-                }])->get()->last();
-            if ($encuesta != null and !$encuesta->encuestas->IsEmpty()) {
-                return redirect("/encuesta/" . $encuesta->encuestas->first()->id);
-            }
-        } elseif (auth()->user()->type == 'contratista') {
-            $tickets = Ticket::whereHas('detalle', function (Builder $query) {
-                $query->where('contratista_id', auth()->user()->contratista->id);
-            })->get();
-        } elseif (auth()->user()->type == 'coordinador') {
-            $tickets = Ticket::where(array(
-                ['estado', '<>', 'Cancelada'],
-                ['cat_id', auth()->user()->cat->id],
-            ))->get();
-        } else {
-            $tickets = Ticket::where('estado', '<>', 'Cancelada')->get();
+        if ($user->es_cliente) {
+            $qry->where('cliente_id', $user->cliente->id);
         }
+        if ($user->es_contratista) {
+            $qry->whereHas('manpowers', fn($power) => $power->where('manpowers.contratista_id', $user->contratista->id));
+        }
+        if ($user->es_coordinador) {
+            $qry->where('cat_id', $user->cat->id);
+        }
+        if ($request->buscar) {
+            $qry->buscar($request->buscar);
+        }
+        if ($request->estado !== null) {
+            $qry->where('estado', $request->estado);
+        }
+        if ($request->condominio_id) {
+            $qry->where('condominio_id', $request->condominio_id);
+        }
+        $tickets = $qry->paginate()->appends($request->all());
+        $condominios = Condominio::all();
+        $estados = TicketStatus::toArray();
 
-        return view('tickets.index', array(
-            'tickets' => $tickets,
+        return view('tickets.index', compact(
+            'tickets', 'condominios', 'estados'
         ));
     }
 
@@ -64,10 +71,18 @@ class TicketController extends Controller
      */
     public function create()
     {
-        $familias = Familia::get();
-        $clientes = Cliente::get();
-        $ubicaciones = Ubicacion::get();
         $condominios = Condominio::get();
+        $clientes = old('condominio_id')
+            ? Cliente::where('condominio_id', old('condominio_id'))->get()
+            : [];
+        $ubicaciones = Ubicacion::get();
+        $familias = Familia::with([
+            'conceptos' => fn($q) => $q->orderBy('nombre', 'ASC'),
+            'fallas' => fn($q) => $q->orderBy('nombre', 'ASC'),
+        ])
+        ->orderBy('nombre', 'ASC')
+        ->get()
+        ->keyBy('id');
 
         return view('tickets.create', array(
             'familias' => $familias,
@@ -77,66 +92,55 @@ class TicketController extends Controller
         ));
     }
 
-    public function getTicketValues(Request $request)
-    {
-        $body = $request->input();
-        $familia = Familia::where('id', $body['id'])->first();
-        return response()->json(array(
-            'conceptos' => $familia->conceptos,
-            'fallas' => $familia->fallas,
-        ));
-    }
-
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\TicketStore  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(TicketStore $request)
     {
         $ticket = new Ticket();
-        if (auth()->user()->type == 'user') {
-            $ticket->cliente_id = $request->Cliente;
+        if ($cliente = auth()->user()->cliente) {
+            $ticket->cliente_id = $cliente->id;
+            $ticket->condominio_id = $cliente->condominio_id;
         } else {
-            $ticket->cliente_id = auth()->user()->cliente->id;
+            $ticket->condominio_id = $request->condominio_id;
+            $ticket->cliente_id = $request->cliente_id;
+            $ticket->created_at = $request->created_at ?? now();
+            $ticket->prototipo = $request->prototipo;
         }
         $ticket->save();
 
-        for ($i = 0; $i < sizeof($request->Falla); $i++) {
+        $ticket->detalles()->saveMany(array_map(function($data) {
             $detalle = new DetalleTicket();
-            $detalle->ticket_id = $ticket->id;
-            $detalle->familia_id = $request->Familia[$i];
-            $detalle->concepto_id = $request->Concepto[$i];
-            $detalle->falla_id = $request->Falla[$i];
-            $detalle->ubicacion_id = $request->Ubicacion[$i];
-            $detalle->save();
-        }
+            $detalle->familia_id = $data['familia_id'];
+            $detalle->concepto_id = $data['concepto_id'];
+            $detalle->falla_id = $data['falla_id'];
+            $detalle->ubicacion_id = $data['ubicacion_id'];
+            return $detalle;
+        }, $request->detalles));
 
-        $encuesta = new Encuesta();
-        $encuesta->ticket_id = $ticket->id;
-        $encuesta->save();
+        $ticket->encuestas()->saveMany([new Encuesta()]);
 
-        return view('tickets.success', array(
-            'dictamen' => $ticket->id,
-        ));
+        return redirect()->route('tickets.show', $ticket->id);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Ticket  $ticket
+     * @param  \App\Models\Ticket  $ticket
      * @return \Illuminate\Http\Response
      */
     public function show(Ticket $ticket)
     {
-        $coordinadores = Coordinador::with('user')->get();
-        $contratistas = Contratista::with('user')->get();
+        $ticket->load('coordinador', 'detalles', 'detalles.ticket');
+        $coordinadores = Coordinador::with('user', 'agenda_cat')->get();
+        $contratistas = Contratista::with('user', 'agenda_tc')->get();
         $ubicaciones = Ubicacion::all();
         $clientes = Cliente::all();
-        $view = (auth()->user()->type == 'cliente') ? 'tickets.cshow' : 'tickets.show';
 
-        return view($view, array(
+        return view('tickets.show', array(
             'ticket' => $ticket,
             'cats' => $coordinadores,
             'contratistas' => $contratistas,
@@ -148,7 +152,7 @@ class TicketController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Ticket  $ticket
+     * @param  \App\Models\Ticket  $ticket
      * @return \Illuminate\Http\Response
      */
     public function edit(Ticket $ticket)
@@ -170,7 +174,7 @@ class TicketController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Ticket  $ticket
+     * @param  \App\Models\Ticket  $ticket
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Ticket $ticket)
@@ -192,140 +196,36 @@ class TicketController extends Controller
             ->with('message', 'Se ha actualizado el ticket correctamente');
     }
 
-    public function asignarCat(Request $request)
+    public function asignarCat(TicketCoordinadorUpdate $request, Ticket $ticket)
     {
-
-        $body = $request->input();
-        $catSeleccionado = $body['catSeleccionado'];
-
-        if ($catSeleccionado != 'none') {
-
-            $ticket = Ticket::findOrFail($body['id']);
-            $ticket->cat_id = $catSeleccionado;
-            $ticket->save();
-
-            $mensaje = 'CAT asignado correctamente.';
-        } else {
-            $mensaje = 'No hay CAT seleccionado.';
+        $this->authorize('asignarCat', $ticket);
+        $ticket->cat_id = $request->cat_id;
+        $ticket->cita_cat = $request->cita_cat;
+        $ticket->cita_cat_fin = $request->cita_cat_fin;
+        if ($ticket->estado < TicketStatus::APPRAISING) {
+            $ticket->estado = TicketStatus::APPRAISING;
         }
-
-        return response()->json(array(
-            'mensaje' => $mensaje,
-        ));
-    }
-
-    public function asignarPrototipo(Request $request)
-    {
-        $body = $request->input();
-        $prototipo = $body['prototipo'];
-
-        if ($prototipo != '') {
-
-            $ticket = Ticket::findOrFail($body['id']);
-            $ticket->prototipo = $prototipo;
-            $ticket->update();
-
-            $mensaje = 'Prototipo asignado correctamente.';
-        } else {
-            $mensaje = 'Agregue un prototipo.';
-        }
-
-        return response()->json(array(
-            'mensaje' => $mensaje,
-        ));
-    }
-
-    public function asignarCita(Request $request)
-    {
-
-        $body = $request->input();
-        $cita = $body['cita'];
-
-        if (!is_null($cita)) {
-
-            $ticket = Ticket::findOrFail($body['id']);
-            $ticket->cita_cat = Carbon::createFromFormat('d/m/Y', $cita)->format('Y-m-d');
-            $ticket->save();
-
-            $mensaje = 'Cita asignada correctamente.';
-        } else {
-            $mensaje = 'No has seleccionado una fecha para la cita.';
-        }
-
-        return response()->json(array(
-            'mensaje' => $mensaje,
-        ));
-    }
-
-    public function asignarCitaAtencion(Request $request)
-    {
-
-        $body = $request->input();
-        $ticket = Ticket::findOrFail($body['id']);
-        $citaAtencion = $body['citaAtencion'];
-
-        if (!is_null($citaAtencion)) {
-
-            $ticket = Ticket::findOrFail($body['id']);
-            $field = "cita_atencion_" . $body['numeroCita'];
-            $ticket->$field = Carbon::createFromFormat('m/d/Y g:i A', $citaAtencion)->format('Y-m-d H:i');
-            $ticket->save();
-
-            $mensaje = 'Cita asignada correctamente.';
-        } else {
-            $mensaje = 'No has seleccionado una fecha para la cita.';
-        }
-
-        return response()->json(array(
-            'mensaje' => $mensaje,
-        ));
-    }
-
-    public function asignarFechaReporte(Request $request)
-    {
-        $body = $request->input();
-        $ticket = Ticket::findOrFail($body['id']);
-        $fechaReporte = $body['fechaReporte'];
-
-        if (!is_null($fechaReporte)) {
-
-            $ticket = Ticket::findOrFail($body['id']);
-            $ticket->created_at = Carbon::createFromFormat('d/m/Y', $fechaReporte)->format('Y-m-d');
-            $ticket->save();
-
-            $mensaje = 'Fecha de reporte cambiada correctamente.';
-        } else {
-            $mensaje = 'No has seleccionado una fecha de reporte del ticket.';
-        }
-
-        return response()->json(array(
-            'mensaje' => $mensaje,
-        ));
+        $ticket->save();
+        return redirect()->route('tickets.show', $ticket->id)->with('message', 'Coordinador asignado correctamente!');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Ticket  $ticket
+     * @param  \App\Models\Ticket  $ticket
      * @return \Illuminate\Http\Response
      */
     public function destroy(Ticket $ticket)
     {
-        $ticket = Ticket::findOrFail($ticket->id);
-        $ticket->estado = 'Cancelada';
-        $ticket->update();
+        $ticket->delete();
 
-        return redirect('/tickets')
-            ->with('message', 'Se ha eliminado el ticket correctamente');
+        return redirect()->route('tickets.index')
+            ->with('message', 'Ticket eliminado correctamente');
     }
 
     public function genaratePDF($ticket_id)
     {
         $ticket = Ticket::findOrFail($ticket_id);
-
-        if ($ticket->cita_cat) {
-            $ticket->cita_cat = Carbon::createFromFormat('Y-m-d', $ticket->cita_cat)->format('d/m/Y');
-        }
 
         $pdf = PDF::loadView('pdf.dictamen', compact('ticket'));
         return $pdf->download('Dictamen' . $ticket_id . '.pdf');

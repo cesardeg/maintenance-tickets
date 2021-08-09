@@ -31,7 +31,7 @@
 @section('content')
 <section class="content">
 	<div class="container-fluid">
-		<div class="card card-primary">
+		<div class="card">
 			<div class="card-header">
 				<h3 class="card-title">Ingresa los datos</h3>
 			</div>
@@ -53,7 +53,7 @@
 						<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Desarrollador">Desarrollador</label>
-								<input type="text" class="form-control" name="Desarrollador" placeholder="Desarrollador" value="{{ old('Desarrollador') }}">
+								<input type="text" class="form-control" name="Desarrollador" placeholder="Desarrollador" value="{{ old('Desarrollador', 'Grupo Trazo') }}">
 							</div>
 						</div>
 						<div class="col-sm-6">
@@ -67,8 +67,8 @@
 								<label for="Condominio">Condominio</label>
 								<select class="form-control" name="Condominio">
 									@foreach ($condominios as $condominio)
-                  <option value="{{ $condominio->id }}" {{ old('Condominio') == $condominio->id ? 'selected' : '' }} >{{ $condominio->nombre }}</option>
-                  @endforeach
+                  					<option value="{{ $condominio->id }}" {{ old('Condominio') == $condominio->id ? 'selected' : '' }} >{{ $condominio->nombre }}</option>
+                  					@endforeach
 								</select>
 							</div>
 						</div>
@@ -84,19 +84,19 @@
 								<input type="text" class="form-control" name="Nombre_completo" placeholder="Nombre completo" value="{{ old('Nombre_completo') }}">
 							</div>
 						</div>
-            <div class="col-sm-6">
+            			<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Coopropietario">Coopropietario</label>
 								<input type="text" class="form-control" name="Coopropietario" placeholder="Coopropietario" value="{{ old('Coopropietario') }}">
 							</div>
 						</div>
-            <div class="col-sm-6">
+            			<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Correo">Correo</label>
 								<input type="text" class="form-control" name="Correo" placeholder="Correo" value="{{ old('Correo') }}">
 							</div>
 						</div>
-            <div class="col-sm-6">
+            			<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Telefono">Teléfono</label>
 								<input type="text" class="form-control" name="Telefono" placeholder="Teléfono" value="{{ old('Telefono') }}">
@@ -113,7 +113,7 @@
 								</div>
 							</div>
 						</div>
-            <div class="col-sm-6">
+            			<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Fecha_poliza" >Fecha de póliza de garantía</label>
 								<div class="input-group date" id="fecha_poliza" data-target-input="nearest">
@@ -124,7 +124,7 @@
 								</div>
 							</div>
 						</div>
-            <div class="col-sm-6">
+            			<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Fecha_entrega" >Fecha de entrega</label>
 								<div class="input-group date" id="fecha_entrega" data-target-input="nearest">
@@ -142,6 +142,7 @@
 							</div>
 						</div>
 					</div> <!-- /.row -->
+				</div>
 				<!-- /.card-body -->
 				<div class="card-footer">
 					<button type="submit" class="btn btn-success">Registrar</button>
@@ -162,19 +163,9 @@ $(document).ready(function () {
 	bsCustomFileInput.init();
 });
 $(function () {
-	$('#fecha_escrituracion').datetimepicker({
-		format: 'L',
-		locale: 'es'
-	});
-
-	$('#fecha_poliza').datetimepicker({
-		format: 'L',
-		locale: 'es'
-	});
-
-	$('#fecha_entrega').datetimepicker({
-		format: 'L',
-		locale: 'es'
+	$('#fecha_escrituracion, #fecha_poliza, #fecha_entrega').datetimepicker({
+		format: 'YYYY-MM-DD',
+		locale: 'es',
 	});
 });
 </script>

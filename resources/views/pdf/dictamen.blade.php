@@ -59,7 +59,7 @@
                     COORDINADOR DE ATENCIÓN TÉCNICA (CAT): <br> {{ $ticket->coordinador?->nombre ?? 'Pendiente de asignación' }}
                 </td>
                 <td>
-                    FECHA VISITA CAT: <br> {{ $ticket->cita_cat?->format('d/m/Y H:i') ?? 'No disponible' }}
+                    FECHA VISITA CAT: <br> {{ $ticket->cita_cat?->format('d/m/Y H:i') ?? 'N/D' }}
                 </td>
             </tr>
 
@@ -77,7 +77,7 @@
                         COMPONENTES: <br> {{ $detalle->concepto?->nombre}}
                     </td>
                     <td>
-                        Tipo de falla: <br> {{ $detalle->falla?->nombre}}
+                        TIPO DE FALA: <br> {{ $detalle->falla?->nombre ?? '-' }}
                     </td>
                 </tr>
                 <tr>
@@ -89,7 +89,7 @@
                         PROCEDE: <br> {{ $detalle->valoracion }}
                     </td>
                     <td>
-                        OBSERVACIONES <br> {{ $detalle->observacion }}
+                        OBSERVACIONES <br> {{ $detalle->observacion ?? 'N/D' }}
                     </td>
                 </tr>
                 @foreach($detalle->manpowers as $manpower)

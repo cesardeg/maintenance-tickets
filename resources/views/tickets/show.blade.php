@@ -208,7 +208,7 @@
 					<div class="col-sm-3">
 						<div class="form-group">
 							<label>Falla</label>
-							<p>{{ $detalle->falla?->nombre }}</p>
+							<p>{{ $detalle->falla?->nombre ?? '-' }}</p>
 						</div>
 					</div>
 					<div class="col-sm-3">
@@ -226,7 +226,7 @@
 					<div class="col-sm-6">
 						<div class="form-group">
 							<label>Observaciones</label>
-							<p>{{ $detalle->observacion ?? 'n/a' }}</p>
+							<p>{{ $detalle->observacion ?? 'n/d' }}</p>
 						</div>
 					</div>
 				</div>
@@ -307,7 +307,7 @@
 					data-observacion="{{ $detalle->observacion }}"
 					data-toggle="modal"
 					data-target="#modal-valorar">
-					Valorar falla
+					Emitir dictamen
 				</button>
 				@endcan
 				@can('asignarContratista', $detalle)

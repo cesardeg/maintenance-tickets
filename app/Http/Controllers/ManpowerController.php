@@ -32,6 +32,7 @@ class ManpowerController extends Controller
 
         if ($ticket->no_finalizado && $ticket->manpowers->every->finalizado) {
             $ticket->estado = TicketStatus::FINISHED;
+            $ticket->fecha_finalizado = today();
             $ticket->save();
         }
 
@@ -49,6 +50,7 @@ class ManpowerController extends Controller
         $manpower->load('ticket.manpowers');
         if ($ticket->no_finalizado && $ticket->manpowers->isNotEmpty() && $ticket->manpowers->every->finalizado) {
             $ticket->estado = TicketStatus::FINISHED;
+            $ticket->fecha_finalizado = today();
             $ticket->save();
         }
 

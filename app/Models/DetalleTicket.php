@@ -65,6 +65,6 @@ class DetalleTicket extends Model
 
     public function toString()
     {
-        return "{$this->concepto->nombre} - {$this->falla->nombre}";
+        return collect([$this->concepto?->nombre, $this->falla?->nombre])->filter()->join(' - ');
     }
 }

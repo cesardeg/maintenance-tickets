@@ -139,7 +139,7 @@
                                 <div class="form-group">
                                     <label for="falla-{{ $i }}">Falla</label>
                                     <select id="falla-{{ $i }}" class="form-control" name="detalles[{{ $i }}][falla_id]">
-                                        <option value="" selected disabled>Selecciona falla...</option>
+                                        <option value="" selected>Selecciona falla...</option>
                                         @if(Arr::get($detalle, 'familia_id'))
                                             @foreach ($familias[Arr::get($detalle, 'familia_id')]->fallas as $falla)
                                             <option value="{{ $falla->id }}" @if(Arr::get($detalle, 'falla_id') == $falla['id']) selected @endif>

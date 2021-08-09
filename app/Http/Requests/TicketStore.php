@@ -31,7 +31,7 @@ class TicketStore extends FormRequest
             'detalles' => 'required|array|min:1',
             'detalles.*.familia_id' => 'required|exists:familias,id',
             'detalles.*.concepto_id' => 'required|exists:conceptos,id',
-            'detalles.*.falla_id' => 'required|exists:fallas,id',
+            'detalles.*.falla_id' => 'nullable|exists:fallas,id',
             'detalles.*.ubicacion_id' => 'required|exists:ubicaciones,id',
         ];
         if ($this->user()->es_coordinador === false) {

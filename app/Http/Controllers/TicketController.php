@@ -76,7 +76,13 @@ class TicketController extends Controller
             ? Cliente::where('condominio_id', old('condominio_id'))->get()
             : [];
         $ubicaciones = Ubicacion::get();
-        $familias = Familia::with('conceptos', 'fallas')->get()->keyBy('id');
+        $familias = Familia::with([
+            'conceptos' => fn($q) => $q->orderBy('nombre', 'ASC'),
+            'fallas' => fn($q) => $q->orderBy('nombre', 'ASC'),
+        ])
+        ->orderBy('nombre', 'ASC')
+        ->get()
+        ->keyBy('id');
 
         return view('tickets.create', array(
             'familias' => $familias,
@@ -101,7 +107,7 @@ class TicketController extends Controller
         } else {
             $ticket->condominio_id = $request->condominio_id;
             $ticket->cliente_id = $request->cliente_id;
-            $ticket->created_at = $request->created_at;
+            $ticket->created_at = $request->created_at ?? now();
             $ticket->prototipo = $request->prototipo;
         }
         $ticket->save();
@@ -222,6 +228,6 @@ class TicketController extends Controller
         $ticket = Ticket::findOrFail($ticket_id);
 
         $pdf = PDF::loadView('pdf.dictamen', compact('ticket'));
-        return $pdf->stream('Dictamen' . $ticket_id . '.pdf');
+        return $pdf->download('Dictamen' . $ticket_id . '.pdf');
     }
 }

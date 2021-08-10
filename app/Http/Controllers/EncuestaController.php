@@ -32,7 +32,7 @@ class EncuestaController extends Controller
         DB::commit();
 
         return redirect()
-            ->route('tickets.index', $encuesta->ticket_id)
+            ->route('tickets.show', $encuesta->ticket_id)
             ->with('message', 'Se ha registrado la encuesta correctamente');
     }
 

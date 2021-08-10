@@ -14,7 +14,7 @@ class Ticket extends Model
      *
      * @var array
      */
-    protected $dates = ['cita_cat', 'cita_cat_fin'];
+    protected $dates = ['cita_cat', 'cita_cat_fin', 'fecha_finalizado'];
 
     //Relationships
     public function condominio()
@@ -81,6 +81,16 @@ class Ticket extends Model
     public function getNoFinalizadoAttribute()
     {
         return $this->estado < TicketStatus::FINISHED;
+    }
+
+    public function getValoradoAttribute()
+    {
+        return $this->estado > TicketStatus::APPRAISING;
+    }
+
+    public function getEnProgresoAttribute()
+    {
+        return $this->estado == TicketStatus::IN_PROGRESS;
     }
 
     public function getFinalizadoAttribute()

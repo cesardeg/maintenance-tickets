@@ -19,7 +19,6 @@ class DetalleTicketPolicy
      */
     public function view(User $user, DetalleTicket $detalle)
     {
-        dd(0);
         $ticket = $detalle->ticket;
     
         return $user->es_admin || (

@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class RegistrarTrabajo extends FormRequest
+class TicketFinalizar extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,9 +24,16 @@ class RegistrarTrabajo extends FormRequest
     public function rules()
     {
         return [
-            'finalizado'      => 'required|boolean',
-            'trabajado_desde' => 'nullable|required_if:finalizado,1|date_format:Y-m-d H:i',
-            'trabajado_hasta' => 'nullable|required_if:finalizado,1|date_format:Y-m-d H:i|after:trabajado_desde',
+            'fecha_finalizado' => 'nullable|date',
+            'observacion_fin' => 'nullable|string',
+        ];
+    }
+
+    public function attributes()
+    {
+        return [
+            'fecha_finalizado' => 'Fecha de finalizado',
+            'observacion_fin' => 'Comentarios',
         ];
     }
 }

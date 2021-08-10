@@ -24,15 +24,16 @@ class ContratistaStore extends FormRequest
      */
     public function rules()
     {
-        $user = $this->route('contratista')
-            ? User::whereHas('contratista', fn($cat) => $cat->whereId($this->route('contratista')))->first()
+        $id = $this->route()->originalParameter('contratista');
+        $user = $id
+            ? User::whereHas('contratista', fn($cat) => $cat->whereId($id))->first()
             : null;
 
         return [
             "desarrollador"           => "required|string",
             "municipio"               => "required|string",
             "proyecto"                => "required|string",
-            "numero_contratista"      => "required|string|unique:contratistas,numero_contratista," . $this->route('contratista'),
+            "numero_contratista"      => "required|string|unique:contratistas,numero_contratista,{$id}",
             "empresa"                 => "required|string",
             "nombre"                  => "required|string",
             "correo"                  => "required|email|unique:users,email,{$user?->id}",

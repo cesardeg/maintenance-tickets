@@ -130,4 +130,9 @@ class TicketPolicy
     {
         return $ticket->finalizado && ($user->es_admin || $user->es_cliente);
     }
+
+    public function finalizar(User $user, Ticket $ticket)
+    {
+        return $ticket->valorado && $user->es_admin;
+    }
 }

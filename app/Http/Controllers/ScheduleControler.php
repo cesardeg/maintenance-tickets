@@ -37,8 +37,8 @@ class ScheduleControler extends Controller
         $data = $items->map(fn($item) => [
             'id' => $item->id,
             'title' => "#{$item->ticket?->id}",
-            'start' => $item->agendado_desde,
-            'end' => $item->agendado_hasta,
+            'start' => $item->trabajado_desde ?? $item->agendado_desde,
+            'end' => $item->trabajado_hasta ?? $item->agendado_hasta,
         ]);
 
         return response()->json($data);

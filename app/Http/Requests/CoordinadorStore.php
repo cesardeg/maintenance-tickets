@@ -24,15 +24,16 @@ class CoordinadorStore extends FormRequest
      */
     public function rules()
     {
-        $user = $this->route('contratista')
-            ? User::whereHas('contratista', fn($cnt) => $cnt->whereId($this->route('contratista')))->first()
+        $id = $this->route()->originalParameter('cat');
+        $user = $coordinadorId
+            ? User::whereHas('cat', fn($cnt) => $cnt->whereId($id))->first()
             : null;
-    
+
         return [
             "Desarrollador"    => "required|string",
             "Municipio"        => "required|string",
             "Proyecto"         => "required|string",
-            "Numero_cat"       => "required|integer|unique:cat,numero_cat," . $this->route('cat'),
+            "Numero_cat"       => "required|integer|unique:cat,numero_cat,{$id}",
             "Nombre_cat"       => "required|string",
             "Correo"           => "required|email|unique:users,email,{$user?->id}",
             "Telefono"         => "required|digits:10",

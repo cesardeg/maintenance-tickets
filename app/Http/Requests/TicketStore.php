@@ -33,6 +33,7 @@ class TicketStore extends FormRequest
             'detalles.*.concepto_id' => 'required|exists:conceptos,id',
             'detalles.*.falla_id' => 'nullable|exists:fallas,id',
             'detalles.*.ubicacion_id' => 'required|exists:ubicaciones,id',
+            'detalles.*.descripcion' => 'nullable|string',
         ];
         if ($this->user()->es_coordinador === false) {
             array_unshift($rules, [
@@ -57,6 +58,7 @@ class TicketStore extends FormRequest
                 "detalles.{$i}.concepto_id" => "Concepto #{$number}",
                 "detalles.{$i}.falla_id" => "Falla #{$number}",
                 "detalles.{$i}.ubicacion_id" => "Ubicación #{$number}",
+                "detalles.{$i}.descripcion" => "Descripción #{$number}",
             ]);
             $number++;
         }

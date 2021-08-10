@@ -85,7 +85,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Fecha de reporte</label>
+                                <label>Fecha de reporte (opcional)</label>
                                 <div class="input-group" id="fecha-reporte" data-target-input="nearest">
                                     <input type="text" name="created_at" class="form-control datetimepicker-input" data-target="#fecha-reporte" value="{{ old('created_at') }}" />
                                     <div class="input-group-append" data-target="#fecha-reporte" data-toggle="datetimepicker">
@@ -97,7 +97,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Prototipo</label>
+                                <label>Prototipo (opcional)</label>
                                 <input type="text" name="prototipo" class="form-control" value="{{ old('prototipo') }}" />
                             </div>
                             <!-- /.form-group -->
@@ -110,7 +110,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label for="familia-{{ $i }}">Familia</label>
-                                    <select id="familia-{{ $i }}" class="form-control" name="detalles[{{ $i }}][familia_id]" onchange="cambiarOpciones(this, {{ $i }})">
+                                    <select id="familia-{{ $i }}" class="form-control" name="detalles[{{ $i }}][familia_id]" onchange="cambiarOpciones(this, {{ $i }})" required>
                                         <option value="" selected disabled>Selecciona familia...</option>
                                         @foreach ($familias as $familia)
                                         <option value="{{ $familia->id }}" @if(Arr::get($detalle, 'familia_id') == $familia['id']) selected @endif>
@@ -123,7 +123,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label for="concepto-{{ $i }}">Concepto</label>
-                                    <select id="concepto-{{ $i }}" class="form-control" name="detalles[{{ $i }}][concepto_id]">
+                                    <select id="concepto-{{ $i }}" class="form-control" name="detalles[{{ $i }}][concepto_id]" required>
                                         <option value="" selected disabled>Selecciona concepto...</option>
                                         @if(Arr::get($detalle, 'familia_id'))
                                             @foreach ($familias[Arr::get($detalle, 'familia_id')]->conceptos as $concepto)
@@ -153,7 +153,7 @@
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <label for="ubicacion-{{ $i }}">Ubicación</label>
-                                    <select id="ubicacion-{{ $i }}" class="form-control" name="detalles[{{ $i }}][ubicacion_id]">
+                                    <select id="ubicacion-{{ $i }}" class="form-control" name="detalles[{{ $i }}][ubicacion_id]" required>
                                         <option value="" selected disabled>Selecciona ubicación...</option>
                                         @foreach ($ubicaciones as $ubicacion)
                                         <option value="{{ $ubicacion->id }}" @if(Arr::get($detalle, 'ubicacion_id') == $ubicacion['id']) selected @endif>
@@ -161,6 +161,16 @@
                                         </option>
                                         @endforeach
                                     </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label for="descripcion-{{ $i }}">Descripción (opcional)</label>
+                                    <textarea id="descripcion-{{ $i }}"
+                                        class="form-control"
+                                        name="detalles[{{ $i }}][descripcion]"
+                                        rows="2"
+                                        value="{{ Arr::get($detalle, 'descripcion') }}"></textarea>
                                 </div>
                             </div>
                             <div class="col-sm-12 text-right">
@@ -193,7 +203,7 @@
 <script type="text/javascript">
 $('.select2').select2();
 $('#fecha-reporte').datetimepicker({
-    format: 'YYYY-MM-DD HH:mm:ss',
+    format: 'YYYY-MM-DD HH:mm',
     locale: 'es',
     useCurrent: true,
     sideBySide: true,
@@ -302,6 +312,17 @@ function agregarFalla() {
                         value: ubicacion.id,
                     }).text(ubicacion.nombre))
                 ))
+            ])
+        ),
+        $('<div />', {'class': 'col-sm-12'}).append(
+            $('<div />', {'class': 'form-group'}).append([
+                $('<label />', {for: 'descripcion-' + index}).text('Descripción (opcional)'),
+                $('<textarea />', {
+                    id: 'descripcion-' + index,
+                    'class': 'form-control',
+                    name: 'detalles[' + index + '][descripcion]',
+                    rows: 2,
+                })
             ])
         ),
         $('<div />', {'class': 'col-sm-12 text-right'}).append(

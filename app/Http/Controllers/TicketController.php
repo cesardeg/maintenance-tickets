@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Http\Requests\TicketStore;
 use App\Http\Requests\TicketCoordinadorUpdate;
+use App\Http\Requests\TicketFinalizar;
 use PDF;
 
 class TicketController extends Controller
@@ -35,7 +36,7 @@ class TicketController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $qry = Ticket::with('condominio', 'cliente')->latest();
+        $qry = Ticket::with('condominio', 'cliente')->latest('id');
 
         if ($user->es_cliente) {
             $qry->where('cliente_id', $user->cliente->id);
@@ -107,8 +108,10 @@ class TicketController extends Controller
         } else {
             $ticket->condominio_id = $request->condominio_id;
             $ticket->cliente_id = $request->cliente_id;
-            $ticket->created_at = $request->created_at ?? now();
             $ticket->prototipo = $request->prototipo;
+            if ($request->created_at) {
+                $ticket->created_at = Carbon::create($request->created_at);
+            }
         }
         $ticket->save();
 
@@ -118,6 +121,7 @@ class TicketController extends Controller
             $detalle->concepto_id = $data['concepto_id'];
             $detalle->falla_id = $data['falla_id'];
             $detalle->ubicacion_id = $data['ubicacion_id'];
+            $detalle->descripcion = $data['descripcion'];
             return $detalle;
         }, $request->detalles));
 
@@ -229,5 +233,19 @@ class TicketController extends Controller
 
         $pdf = PDF::loadView('pdf.dictamen', compact('ticket'));
         return $pdf->download('Dictamen' . $ticket_id . '.pdf');
+    }
+
+    public function finalizar(TicketFinalizar $request, Ticket $ticket)
+    {
+        $this->authorize('finalizar', $ticket);
+
+        if ($ticket->en_progreso) {
+            $ticket->estado = TicketStatus::FINISHED;
+        }
+        $ticket->fecha_finalizado = $request->fecha_finalizado ? Carbon::create($request->fecha_finalizado) : now();
+        $ticket->observacion_fin = $request->observacion_fin;
+        $ticket->save();
+
+        return redirect()->route('tickets.show', $ticket->id)->with('message', 'Ticket finalizado correctamente!');
     }
 }

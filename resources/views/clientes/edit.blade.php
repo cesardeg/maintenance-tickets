@@ -165,8 +165,8 @@ $(document).ready(function () {
 });
 $(function () {
 	$('#fecha_escrituracion, #fecha_poliza, #fecha_entrega').datetimepicker({
-		format: 'YYYY-mm-DD',
-		locale: 'es'
+		format: 'YYYY-MM-DD',
+		locale: 'es',
 	});
 });
 </script>

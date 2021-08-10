@@ -23,6 +23,13 @@ Route::group(['middleware' => ['web', 'auth']], function(){
     Route::resource('cat', 'CoordinadorController');
 
     Route::resource('tickets', 'TicketController');
+    //Ruta para generar pdf del dictamen
+    Route::get('tickets/{ticket}/pdf', 'TicketController@genaratePDF')->name('tickets.showPDF');
+    //Rutas para actualizacion de un ticket
+    Route::post('tickets/{ticket}/finalizar', 'TicketController@finalizar')->name('tickets.finalizar');
+    Route::post('tickets/{ticket}/asignarCat', 'TicketController@asignarCat')->name('tickets.add-cat');
+    Route::post('detallesTicket/{detalle}/valorar', 'DetalleTicketController@valorar')->name('detalles-ticket.valorar');
+    Route::post('detallesTicket/{detalle}/contratistas', 'DetalleTicketController@asignarContratista')->name('detalles-ticket.contratistas.store');
 
     Route::put('manpowers/{manpower}/log', 'ManpowerController@registrarTrabajo')->name('manpowers.log');
     Route::delete('manpowers/{manpower}', 'ManpowerController@destroy')->name('manpowers.destroy');
@@ -42,12 +49,6 @@ Route::group(['middleware' => ['web', 'auth']], function(){
     Route::get('schedules/coordinador', 'ScheduleControler@coordinador')->name('schedules.coordinador');
     Route::get('schedules/contratista', 'ScheduleControler@contratista')->name('schedules.contratista');
 });
-//Rutas para actualizacion de un ticket
-Route::post('tickets/{ticket}/asignarCat', 'TicketController@asignarCat')->name('tickets.add-cat');
-Route::post('detallesTicket/{detalle}/valorar', 'DetalleTicketController@valorar')->name('detalles-ticket.valorar');
-Route::post('detallesTicket/{detalle}/contratistas', 'DetalleTicketController@asignarContratista')->name('detalles-ticket.contratistas.store');
-//Ruta para generar pdf del dictamen
-Route::get('tickets/{ticket}/pdf', 'TicketController@genaratePDF')->name('tickets.showPDF');
 
 //Rutas para obtener datos de las estadisticas
 Route::get('estadistica-proyectos/getData', 'EstadisticasController@dataProyectos');

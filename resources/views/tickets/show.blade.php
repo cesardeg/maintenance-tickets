@@ -86,14 +86,17 @@
 					</div>
 					<div class="col-sm-6">
 						<div class="form-group">
-							<label>Fecha poliza</label>
-							<p>{{ $ticket->cliente?->fecha_poliza?->format('d/m/Y') }}</p>
+							<label>Fecha de finalizado</label>
+							<p>{{ $ticket->fecha_finalizado?->format('d/m/Y') ?? '-'}}</p>
 						</div>
 					</div>
 					<div class="col-sm-6">
 						<div class="form-group">
-							<label>Condominio</label>
-							<p>{{ $ticket->condominio?->nombre }}</p>
+							<label>Domicilio</label>
+							<p>
+								{{ $ticket->condominio?->nombre }}
+								{{ $ticket->cliente?->numero_cliente }}
+							</p>
 						</div>
 					</div>
 					<div class="col-sm-6">
@@ -116,10 +119,8 @@
 					</div>
 					<div class="col-sm-6">
 						<div class="form-group">
-							<label>No. Cliente</label>
-							<p>
-								{{ $ticket->cliente?->numero_cliente }}
-							</p>
+							<label>Fecha poliza</label>
+							<p>{{ $ticket->cliente?->fecha_poliza?->format('d/m/Y') }}</p>
 						</div>
 					</div>
 					<div class="col-sm-6">
@@ -168,10 +169,24 @@
 							@endif
 						</div>
 					</div>
-					
 				</div>
+				@if ($ticket->observacion_fin && !Auth::user()->es_cliente)
+				<div class="row">
+					<div class="col-sm-12">
+						<div class="form-group">
+							<label>Comentarios de finalización</label>
+							<p>{{ $ticket->observacion_fin }}</p>
+						</div>
+					</div>
+				</div>
+				@endif
             </div>
 			<div class="card-footer text-right">
+				@can('finalizar', $ticket)
+				<button class="btn btn-primary" data-toggle="modal" data-target="#modal-finalizar">
+					Marcar Finalizado
+				</button>
+				@endcan
 				@can('asignarCat', $ticket)
 				<button class="btn btn-primary" data-toggle="modal" data-target="#modal-cat">
 					Asignar CAT
@@ -193,43 +208,70 @@
 			<!-- /.card-header -->
 			<div class="card-body">
 				<div class="row">
-					<div class="col-sm-3">
+					<div class="col-sm">
 						<div class="form-group">
 							<label>Familia</label>
 							<p>{{ $detalle->familia?->nombre }}</p>
 						</div>
 					</div>
-					<div class="col-sm-3">
+					<div class="col-sm">
 						<div class="form-group">
 							<label>Concepto</label>
 							<p>{{ $detalle->concepto?->nombre }}</p>
 						</div>
 					</div>
-					<div class="col-sm-3">
+					<div class="col-sm">
 						<div class="form-group">
 							<label>Falla</label>
 							<p>{{ $detalle->falla?->nombre ?? '-' }}</p>
 						</div>
 					</div>
-					<div class="col-sm-3">
+					<div class="col-sm">
 						<div class="form-group">
 							<label>Ubicación</label>
 							<p>{{ $detalle->ubicacion?->nombre }}</p>
 						</div>
 					</div>
-					<div class="col-sm-6">
+					<div class="col-sm">
 						<div class="form-group">
-							<label>Procede</label>
-							<p>{{ $detalle->valoracion }}</p>
-						</div>
-					</div>
-					<div class="col-sm-6">
-						<div class="form-group">
-							<label>Observaciones</label>
-							<p>{{ $detalle->observacion ?? 'n/d' }}</p>
+							<label>Dictamen</label>
+							<p @switch($detalle['valoracion'])
+									@case('Pendiente')
+										class="text-muted"
+									@break
+									@case('Si')
+										class="text-success"
+									@break
+									@case('No')
+										class="text-danger"
+									@break
+								@endswitch>
+								{{ $detalle->valoracion_text }}
+							</p>
 						</div>
 					</div>
 				</div>
+				<div class="row">
+					<div class="col-sm-6">
+						@if($detalle->descripcion)
+						<div class="form-group">
+							<label>Descripción de la falla</label>
+							<p>{{ $detalle->descripcion }}</p>
+						</div>
+						@endif
+					</div>
+					<div class="col-sm-6">
+						@if($detalle->pending_valoration === false && $detalle->observacion)
+						<div class="form-group">
+							<label>Observaciones dictamen</label>
+							<p>
+								{{ $detalle->observacion }}
+							</p>
+						</div>
+						@endif
+					</div>
+				</div>
+				@if ($detalle->manpowers->isNotEmpty())
 				<table class="table table-hover table-striped">
 					<thead>
 						<tr>
@@ -241,7 +283,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						@forelse($detalle->manpowers as $manpower)
+						@foreach($detalle->manpowers as $manpower)
 						<tr>
 							<td>
 								<a @can('view', $manpower['contratista']) href="{{ route('contratistas.show', $manpower->contratista_id) }}" @endcan target="_blank">
@@ -281,22 +323,18 @@
 									data-action="{{ route('manpowers.log', $manpower->id) }}"
 									data-falla="{{ $detalle->toString() }}"
 									data-contratista="{{ $manpower->contratista?->nombre }}"
-									data-desde="{{ old('trabajado_desde', $manpower->trabajado_desde ?? $manpower->agendado_desde) }}"
-									data-hasta="{{ old('trabajado_hasta', $manpower->trabajado_hasta ?? $manpower->agendado_hasta) }}"
+									data-desde="{{ old('trabajado_desde', $manpower->trabajado_desde?->format('Y-m-d H:i') ?? $manpower->agendado_desde?->format('Y-m-d H:i')) }}"
+									data-hasta="{{ old('trabajado_hasta', $manpower->trabajado_hasta?->format('Y-m-d H:i') ?? $manpower->agendado_hasta?->format('Y-m-d H:i')) }}"
 									data-toggle="modal"
 									data-target="#modal-trabajo">
 									Registrar atención
 								</button>
 								@endcan
 							</td>
-						@empty
-							<td colspan="5" class="text-center text-muted">
-								Sin contratistas asignados
-							</td>
-						</tr>
-						@endforelse
+						@endforeach
 					</tbody>
 				</table>
+				@endif
 			</div>
 			<div class="card-footer text-right">
 				@can('valorar', $detalle)
@@ -424,7 +462,7 @@
 					</div>
 					<div class="col-sm-12">
 						<div class="form-group">
-							<label for="observacion">Observaciones</label>
+							<label for="observacion">Observaciones dictamen</label>
 							<textarea class="form-control" name="observacion" id="observacion" rows="5"></textarea>
 						</div>
 					</div>
@@ -538,6 +576,8 @@
 							</select>
 						</div>
 					</div>
+				</div>	
+				<div class="row" id="fechas-trabajo">
 					<div class="col-sm-6">
 						<div class="form-group">
 							<label for="valoracion">Trabajado desde</label>
@@ -632,6 +672,43 @@
 	</div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="modal-finalizar" tabindex="-1">
+	<div class="modal-dialog">
+		<form class="modal-content" action="{{ route('tickets.finalizar', $ticket->id) }}" method="post" id="form-eliminar">
+			@csrf()
+			<div class="modal-header">
+				<h5 class="modal-title">
+					Finalizar ticket
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label for="valoracion">Fecha de finalizado</label>
+					<div class="input-group" id="fecha-finalizado" data-target-input="nearest">
+						<input type="text" name="fecha_finalizado" class="form-control datetimepicker-input" data-target="#fecha-finalizado"
+							value="{{ old('fecha_finalizado', $ticket->fecha_finalizado) }}" />
+						<div class="input-group-append" data-target="#fecha-finalizado" data-toggle="datetimepicker">
+							<div class="input-group-text"><i class="fa fa-calendar"></i></div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="observacion_fin">Comentarios</label>
+					<textarea id="observacion_fin" class="form-control" cols="2" name="observacion_fin" value="{{ old('observacion_fin') }}"></textarea>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+				<button type="submit" class="btn btn-primary">Finalizar ticket</button>
+			</div>
+		</form>
+	</div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -643,10 +720,15 @@
 $(window).on('load', function () {
 	$('#trabajado-desde, #trabajado-hasta').datetimepicker({
 		format: 'YYYY-MM-DD HH:mm',
-		stepping: 30,
-		locale: 'es',
 		useCurrent: false,
 		sideBySide: true,
+		locale: 'es',
+	});
+
+	$('#fecha-finalizado').datetimepicker({
+		format: 'YYYY-MM-DD',
+		useCurrent: true,
+		locale: 'es',
 	});
 
 	$('#modal-valorar').on('shown.bs.modal', function (event) {
@@ -688,6 +770,10 @@ $(window).on('load', function () {
   		modal.find('#finalizado-trabajo').val('1');
   		modal.find('#desde-trabajo').val(desde);
   		modal.find('#hasta-trabajo').val(hasta);
+	});
+
+	$('#finalizado-trabajo').on('change', function () {
+		$('#fechas-trabajo').toggle($(this).val() == 1);
 	});
 
 	$('#modal-eliminar-contratista').on('shown.bs.modal', function (event) {

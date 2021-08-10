@@ -63,6 +63,19 @@ class DetalleTicket extends Model
         return $this->valoracion === 'No';
     }
 
+    public function getValoracionTextAttribute()
+    {
+        if ($this->pending_valoration) {
+            return 'Pendiente';
+        }
+        if ($this->accepted_valoration) {
+            return 'Procede';
+        }
+        if ($this->rejected_valoration) {
+            return 'No procede';
+        }
+    }
+
     public function toString()
     {
         return collect([$this->concepto?->nombre, $this->falla?->nombre])->filter()->join(' - ');

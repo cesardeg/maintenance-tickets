@@ -24,7 +24,7 @@ class FallasTableSeeder extends Seeder
         $falla->save();
         $familia->fallas()->attach($falla);
 
-        $falla = Falla::firstOrNew(['id' => 1]);
+        $falla = Falla::firstOrNew(['id' => 2]);
         $falla->nombre = 'Dañado';
         $falla->save();
         $familia->fallas()->attach($falla);
@@ -466,7 +466,7 @@ class FallasTableSeeder extends Seeder
         $falla->save();
         $familia->fallas()->attach($falla);
 
-        $falla = Falla::firstOrNew(['id' => 41]);
+        $falla = Falla::firstOrNew(['id' => 76]);
         $falla->nombre = 'Vidrios flojos / endebles';
         $falla->save();
         $familia->fallas()->attach($falla);

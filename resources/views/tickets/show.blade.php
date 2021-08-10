@@ -184,7 +184,7 @@
 			<div class="card-footer text-right">
 				@can('finalizar', $ticket)
 				<button class="btn btn-primary" data-toggle="modal" data-target="#modal-finalizar">
-					Marcar Finalizado
+					Finalizar ticket
 				</button>
 				@endcan
 				@can('asignarCat', $ticket)

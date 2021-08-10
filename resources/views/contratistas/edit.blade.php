@@ -284,8 +284,7 @@
 
 							</div>
 							<div class="modal-footer justify-content-left">
-								<!-- <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cerrar</button> -->
-								<button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Asignar</button>
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Listo</button>
 							</div>
 						</div>
 						<!-- /.modal-content -->

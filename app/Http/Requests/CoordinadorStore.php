@@ -25,7 +25,7 @@ class CoordinadorStore extends FormRequest
     public function rules()
     {
         $id = $this->route()->originalParameter('cat');
-        $user = $coordinadorId
+        $user = $id
             ? User::whereHas('cat', fn($cnt) => $cnt->whereId($id))->first()
             : null;
 

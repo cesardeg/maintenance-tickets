@@ -68,7 +68,7 @@ class ClienteController extends Controller
             "Desarrollador" => "required|string",
             "Municipio" => "required|string",
             "Condominio" => "required|string",
-            "Numero_cliente" => "required|string|unique:clientes,numero_cliente",
+            "Numero_cliente" => "required|string",
             "Nombre_completo" => "required|string",
             "Coopropietario" => "nullable|string",
             "Correo" => "required|email|unique:users,email",
@@ -103,7 +103,7 @@ class ClienteController extends Controller
         });
 
 
-        return redirect('/clientes')
+        return redirect()->route('clientes.show', $cliente->id)
                     ->with('message', 'Se ha registrado al cliente correctamente');
     }
 
@@ -151,14 +151,15 @@ class ClienteController extends Controller
      */
     public function update(Request $request, Cliente $cliente)
     {
+        $user = $cliente->user()->firstOrFail();
         $validator = $this->validate($request, [
             "Desarrollador" => "required|string",
             "Municipio" => "required|string",
             "Condominio" => "required|string",
-            "Numero_cliente" => "required|string|unique:clientes,numero_cliente," . $cliente->id,
+            "Numero_cliente" => "required|string",
             "Nombre_completo" => "required|string",
             "Coopropietario" => "nullable|string",
-            "Correo" => "email|required|string",
+            "Correo" => "required|email|unique:users,email," . $user->id,
             "Telefono" => "required|digits:10",
             "Fecha_escrituracion" => "required|string",
             "Fecha_poliza" => "required|string",
@@ -166,16 +167,10 @@ class ClienteController extends Controller
             "Comentarios" => "nullable|string"
         ]);
 
-        if ($request->Correo != $cliente->user->email) {
-            $emailExist = User::where('email', $request->Correo)->first();
-            if ($emailExist) {
-                return back()->withErrors(['Esta cuenta de correo ya fue registrada'])
-                    ->withInput(request(['Desarrollador', 'Municipio', 'Condominio', 'Numero_cliente', 'Nombre_completo', 'Coopropietario', 'Correo', 'Telefono', 'Fecha_escrituracion', 'Fecha_poliza', 'Fecha_entrega', 'Comentarios']));
-            } else {
-                $user = User::findOrFail($cliente->user_id);
-                $user->email = $request->Correo;
-                $user->save();
-            }
+        if ($request->Correo != $user->email) {
+            $user = User::findOrFail($cliente->user_id);
+            $user->email = $request->Correo;
+            $user->save();
         }
 
         $cliente->desarrollador = $request->Desarrollador;
@@ -191,8 +186,8 @@ class ClienteController extends Controller
         $cliente->comentarios = $request->Comentarios;
         $cliente->save();
 
-        return redirect('/clientes')
-                    ->with('message', 'Se ha actualizado al cliente correctamente');
+        return redirect()->route('clientes.show', $cliente->id)
+                ->with('message', 'Se ha actualizado al cliente correctamente');
     }
 
     /**

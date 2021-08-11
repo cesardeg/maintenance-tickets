@@ -1,9 +1,11 @@
 @extends('general.layout')
 
 @push('styles')
-<link rel="stylesheet" href="{{ url('/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css') }}">
-<link rel="stylesheet" href="{{ url('/plugins/toastr/toastr.min.css') }}">
-<link rel="stylesheet" href="{{ url('/plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('/plugins/toastr/toastr.min.css') }}">
+<link rel="stylesheet" href="{{ asset('/plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
 @endpush
 
 @section('header')
@@ -34,25 +36,25 @@
 		@endif
 		<div class="text-right mb-3">
 			@can('contestar', $ticket->encuesta)
-			<a href="{{ route('encuestas.contestar', $ticket->encuesta->id) }}" class="btn btn-info">
+			<a href="{{ route('encuestas.contestar', $ticket->encuesta->id) }}" class="btn btn-info m-1">
 				Contestar encuesta
 			</a>
 			@else
 				@can('view', $ticket->encuesta)
-				<a href="{{ route('encuestas.show', $ticket->encuesta->id) }}" class="btn btn-info">
+				<a href="{{ route('encuestas.show', $ticket->encuesta->id) }}" class="btn btn-info m-1">
 					Ver encuesta
 				</a>
 				@endcan
 			@endcan
-			<a href="{{ route('tickets.showPDF', $ticket->id) }}" class="btn btn-primary">
+			<a href="{{ route('tickets.showPDF', $ticket->id) }}" class="btn btn-primary m-1">
 				Descargar PDF
 			</a>
 			@can('delete', $ticket)
-			<button class="btn btn-danger" data-toggle="modal" data-target="#modal-eliminar">
+			<button data-toggle="modal" data-target="#modal-eliminar" class="btn btn-danger m-1">
 				Eliminar
 			</button>
 			@endcan
-			<a href="{{ route('tickets.index') }}" class="btn btn-secondary">Regresar</a>
+			<a href="{{ route('tickets.index') }}" class="btn btn-secondary m-1">Regresar</a>
 		</div>
 		<div class="card">
 			<div class="card-header">
@@ -183,12 +185,12 @@
             </div>
 			<div class="card-footer text-right">
 				@can('finalizar', $ticket)
-				<button class="btn btn-primary" data-toggle="modal" data-target="#modal-finalizar">
+				<button class="btn btn-primary m-1" data-toggle="modal" data-target="#modal-finalizar">
 					Finalizar ticket
 				</button>
 				@endcan
 				@can('asignarCat', $ticket)
-				<button class="btn btn-primary" data-toggle="modal" data-target="#modal-cat">
+				<button class="btn btn-primary m-1" data-toggle="modal" data-target="#modal-cat">
 					Asignar CAT
 				</button>
 				@endcan
@@ -272,7 +274,7 @@
 					</div>
 				</div>
 				@if ($detalle->manpowers->isNotEmpty())
-				<table class="table table-hover table-striped">
+				<table class="table table-hover table-striped w-100">
 					<thead>
 						<tr>
 							<th>Contratista</th>
@@ -285,17 +287,17 @@
 					<tbody>
 						@foreach($detalle->manpowers as $manpower)
 						<tr>
-							<td>
+							<td class="align-middle">
 								<a @can('view', $manpower['contratista']) href="{{ route('contratistas.show', $manpower->contratista_id) }}" @endcan target="_blank">
 									{{ $manpower->contratista?->nombre }}
 								</a>
 							</td>
-							<td>
+							<td class="align-middle">
 								{{ $manpower->agendado_desde?->format('d/m/Y') }}<br />
 								{{ $manpower->agendado_desde?->format('H:i') }} - 
 								{{ $manpower->agendado_hasta?->format('H:i') }}
 							</td>
-							<td>
+							<td class="align-middle">
 								@if($manpower->finalizado)
 								{{ $manpower->trabajado_desde?->format('d/m/Y') }}<br />
 								{{ $manpower->trabajado_desde?->format('H:i') }} - 
@@ -304,12 +306,12 @@
 								-
 								@endif
 							</td>
-							<td>
+							<td class="align-middle">
 								{{ $manpower->finalizado ? 'Sí' : 'No' }}
 							</td>
-							<td class="text-right">
+							<td class="align-middle">
 								@can('delete', $manpower)
-								<button class="btn btn-danger"
+								<button class="btn btn-danger btn-block m-1"
 									data-action="{{ route('manpowers.destroy', $manpower->id) }}"
 									data-falla="{{ $detalle->toString() }}"
 									data-contratista="{{ $manpower->contratista?->nombre }}"
@@ -319,7 +321,7 @@
 								</button>
 								@endcan
 								@can('registrarTrabajo', $manpower)
-								<button class="btn btn-secondary"
+								<button class="btn btn-secondary btn-block m-1"
 									data-action="{{ route('manpowers.log', $manpower->id) }}"
 									data-falla="{{ $detalle->toString() }}"
 									data-contratista="{{ $manpower->contratista?->nombre }}"
@@ -338,7 +340,7 @@
 			</div>
 			<div class="card-footer text-right">
 				@can('valorar', $detalle)
-				<button class="btn btn-primary"
+				<button class="btn btn-primary m-1"
 					data-action="{{ route('detalles-ticket.valorar', $detalle->id) }}"
 					data-falla="{{ $detalle->toString() }}"
 					data-valoracion="{{ $detalle->valoracion }}"
@@ -349,7 +351,7 @@
 				</button>
 				@endcan
 				@can('asignarContratista', $detalle)
-				<button class="btn btn-primary"
+				<button class="btn btn-primary m-1"
 					data-action="{{ route('detalles-ticket.contratistas.store', $detalle->id) }}"
 					data-falla="{{ $detalle->toString() }}"
 					data-toggle="modal"
@@ -716,6 +718,10 @@
 <script src="{{ asset('/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5/main.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5/locales-all.min.js"></script>
+<script src="{{ asset('/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script src="{{ asset('/plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
 <script>
 $(window).on('load', function () {
 	$('#trabajado-desde, #trabajado-hasta').datetimepicker({
@@ -787,6 +793,16 @@ $(window).on('load', function () {
   		modal.find('#falla-eliminar-contratista').text(falla);
   		modal.find('#eliminar-contratista').text(contratista);
 	});
+
+	$('.table').DataTable({
+		paging: false,
+		lengthChange: false,
+		searching: false,
+		ordering: false,
+		info: false,
+		autoWidth: false,
+		responsive: true,
+    });
 });
 </script>
 <script>

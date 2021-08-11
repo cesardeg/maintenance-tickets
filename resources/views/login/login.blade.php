@@ -21,10 +21,9 @@
 <body class="hold-transition login-page">
 <div class="login-box">
   <!-- /.login-logo -->
-  <div class="card login-card">
-    <div class="login-logo" style="align-self: center;">
+  <div class="card p-md-4">
+    <div class="login-logo mt-3" style="align-self: center;">
       <img src="{{ url('/assets/img/login-logo.jpg') }}" alt="pase-logo" style="display: block; width: 200px;">
-      <b>Inicia sesión</b>
     </div>
     <div class="card-body login-card-body">
       <form action="{{ route('login') }}" method="post">
@@ -66,7 +65,7 @@
             Recuerdame
           </label>
         </div>
-        <div class="row">
+        <div class="row mb-3">
           <div class="col-12">
             <button type="submit" class="btn btn-primary btn-block">Iniciar sesión</button>
           </div>

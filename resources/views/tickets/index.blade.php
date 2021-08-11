@@ -2,8 +2,8 @@
 
 @push('styles')
 <!-- DataTables -->
-<link rel="stylesheet" href="{{ url('/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
-<link rel="stylesheet" href="{{ url('/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
 @endpush
 
 @section('header')
@@ -12,7 +12,7 @@
 	<div class="container-fluid">
 		<div class="row mb-2">
 			<div class="col-sm-6">
-				<h1 class="m-0 text-dark">Listado de tickets</h1>
+				<h1 class="mb-1 text-dark">Listado de tickets</h1>
 			</div><!-- /.col -->
 			<div class="col-sm-6">
 				<ol class="breadcrumb float-sm-right">
@@ -47,13 +47,13 @@
 			<div class="card">
 				<div class="card-body">
 					<form class="form-inline">
-						<div class="input-group mb-3 mr-3">
+						<div class="input-group mb-3 mr-md-3">
 							<div class="input-group-prepend">
 								<i class="input-group-text nav-icon fas fa-search"></i>
 							</div>
 							<input type="text" class="form-control" placeholder="Buscar..." name="buscar" value="{{ request('buscar')  }}">
 						</div>
-						<div class="input-group mb-3 mr-3">
+						<div class="input-group mb-3 mr-md-3">
 							<div class="input-group-prepend">
 								<label class="input-group-text" for="condominio">Condominio</label>
 							</div>
@@ -66,7 +66,7 @@
 								@endforeach
 							</select>
 						</div>
-						<div class="input-group mb-3 mr-3">
+						<div class="input-group mb-3 mr-md-3">
 							<div class="input-group-prepend">
 								<label class="input-group-text" for="estado">Estado</label>
 							</div>
@@ -83,20 +83,20 @@
 							<button type="submit" class="btn btn-secondary">Buscar</button>
 						</div>
 					</form>
-					<table id="example1" class="table no-padding table-hover table-striped">
+					<table id="example1" class="table no-padding table-hover table-striped w-100">
 						<thead>
 						<tr>
-							<th>Folio</th>
+							<th data-priority="1">Folio</th>
 							@unless ( auth()->user()->es_cliente )
 							<th>Condominio</th>
 							<th>No. Cliente</th>
-							<th>Cliente</th>
+							<th data-priority="2">Cliente</th>
 							@endunless
 							@unless ( auth()->user()->es_coordinador )
 							<th>CAT</th>
 							@endunless
 							<th>Fecha de reporte</th>
-							<th>Estado</th>
+							<th data-priority="2">Estado</th>
 							<th style="width: 100px;"></th>
 						</tr>
 						</thead>
@@ -104,19 +104,23 @@
 
 						@foreach ($tickets as $ticket)
 						<tr>
-							<td>{{ $ticket->id }}</td>
+							<td class="align-middle">
+								<a @can('view', $ticket) href="{{ route('tickets.show', $ticket->id) }}" @endcan>
+									{{ $ticket->id }}
+								</a>
+							</td>
 							@unless ( auth()->user()->es_cliente )
-							<td>{{ $ticket->condominio?->nombre }}</td>
-							<td>{{ $ticket->cliente->numero_cliente }}</td>
-							<td>{{ $ticket->cliente->nombre }}</td>
+							<td class="align-middle">{{ $ticket->condominio?->nombre }}</td>
+							<td class="align-middle">{{ $ticket->cliente->numero_cliente }}</td>
+							<td class="align-middle">{{ $ticket->cliente->nombre }}</td>
 							@endunless
 							@unless ( auth()->user()->es_coordinador )
-							<td>{{ $ticket->coordinador?->nombre ?? 'Sin asignar' }}</td>
+							<td class="align-middle">{{ $ticket->coordinador?->nombre ?? 'Sin asignar' }}</td>
 							@endunless
-							<td>{{ $ticket->created_at->format('d/m/Y') }}</td>
-							<td>{{ $ticket->nombre_estado }}</td>
-							<td>
-								<a class="btn btn-info" href="{{ route('tickets.show', $ticket->id) }}">
+							<td class="align-middle">{{ $ticket->created_at->format('d/m/Y') }}</td>
+							<td class="align-middle">{{ $ticket->nombre_estado }}</td>
+							<td class="align-middle">
+								<a class="btn btn-info btn-block" href="{{ route('tickets.show', $ticket->id) }}">
 									Ver
 								</a>
 							</td>
@@ -140,21 +144,20 @@
 @endsection
 
 @push('scripts')
-<script src="{{ url('/plugins/datatables/jquery.dataTables.min.js') }}"></script>
-<script src="{{ url('/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
-<script src="{{ url('/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
-<script src="{{ url('/plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script src="{{ asset('/plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
 <script>
   $(function () {
     $('#example1').DataTable({
-      "paging": false,
-      "lengthChange": true,
-      "searching": false,
-      "ordering": false,
-      "info": false,
-      "autoWidth": false,
-			"responsive": true,
-			"order": [[0, 'desc']]
+		"paging": false,
+		"lengthChange": false,
+		"searching": false,
+		"ordering": false,
+		"info": false,
+		"autoWidth": false,
+		"responsive": true,
     });
   });
 </script>

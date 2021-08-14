@@ -169,8 +169,7 @@
                                     <textarea id="descripcion-{{ $i }}"
                                         class="form-control"
                                         name="detalles[{{ $i }}][descripcion]"
-                                        rows="2"
-                                        value="{{ Arr::get($detalle, 'descripcion') }}"></textarea>
+                                        rows="2">{{ Arr::get($detalle, 'descripcion') }}</textarea>
                                 </div>
                             </div>
                             <div class="col-sm-12 text-right">

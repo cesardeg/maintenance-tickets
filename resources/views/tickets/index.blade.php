@@ -19,7 +19,7 @@
 					@can('create', 'App\Models\Ticket')
 					<li class="breadcrumb-item">
 						<a href="{{ route('tickets.create') }}">
-							<button type="button" class="btn btn-block btn-primary">Crear ticket</button>
+							<button type="button" class="btn btn-block btn-primary">Registrar ticket</button>
 						</a>
 					</li>
 					@endcan

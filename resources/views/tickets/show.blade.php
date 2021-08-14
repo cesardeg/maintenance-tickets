@@ -163,7 +163,7 @@
 					</div>
 					<div class="col-sm-6">
 						<div class="form-group">
-							<label>Fecha de cita</label>
+							<label>Fecha cita CAT</label>
 							@if($ticket->coordinador && $ticket->cita_cat)
 							<p>{{ $ticket->cita_cat?->format('d/m/Y H:i') }}</p>
 							@else
@@ -281,7 +281,8 @@
 							<th>Fecha agendada</th>
 							<th>Fecha de atención</th>
 							<th>Finalizado</th>
-							<th></th>
+							<th width="20%"></th>
+							<th width="20%"></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -309,17 +310,7 @@
 							<td class="align-middle">
 								{{ $manpower->finalizado ? 'Sí' : 'No' }}
 							</td>
-							<td class="align-middle">
-								@can('delete', $manpower)
-								<button class="btn btn-danger btn-block m-1"
-									data-action="{{ route('manpowers.destroy', $manpower->id) }}"
-									data-falla="{{ $detalle->toString() }}"
-									data-contratista="{{ $manpower->contratista?->nombre }}"
-									data-toggle="modal"
-									data-target="#modal-eliminar-contratista">
-									Eliminar
-								</button>
-								@endcan
+							<td>
 								@can('registrarTrabajo', $manpower)
 								<button class="btn btn-secondary btn-block m-1"
 									data-action="{{ route('manpowers.log', $manpower->id) }}"
@@ -329,7 +320,19 @@
 									data-hasta="{{ old('trabajado_hasta', $manpower->trabajado_hasta?->format('Y-m-d H:i') ?? $manpower->agendado_hasta?->format('Y-m-d H:i')) }}"
 									data-toggle="modal"
 									data-target="#modal-trabajo">
-									Registrar atención
+									Atender
+								</button>
+								@endcan
+							</td>
+							<td class="align-middle">
+								@can('delete', $manpower)
+								<button class="btn btn-danger btn-block m-1"
+									data-action="{{ route('manpowers.destroy', $manpower->id) }}"
+									data-falla="{{ $detalle->toString() }}"
+									data-contratista="{{ $manpower->contratista?->nombre }}"
+									data-toggle="modal"
+									data-target="#modal-eliminar-contratista">
+									Eliminar
 								</button>
 								@endcan
 							</td>
@@ -700,7 +703,8 @@
 				</div>
 				<div class="form-group">
 					<label for="observacion_fin">Comentarios</label>
-					<textarea id="observacion_fin" class="form-control" cols="2" name="observacion_fin" value="{{ old('observacion_fin') }}"></textarea>
+					<textarea id="observacion_fin" class="form-control" cols="2"
+						name="observacion_fin">{{ old('observacion_fin', $ticket->observacion_fin) }}</textarea>
 				</div>
 			</div>
 			<div class="modal-footer">

@@ -79,28 +79,26 @@ class ClienteController extends Controller
             "Comentarios" => "nullable|string"
         ]);
 
-        DB::transaction(function () use ($request) {
-            $user = new User();
-            $user->email = $request->Correo;
-            $user->type = 'cliente';
-            $user->password = bcrypt($request->Numero_cliente);
-            $user->save();
+        $user = new User();
+        $user->email = $request->Correo;
+        $user->type = 'cliente';
+        $user->password = bcrypt($request->Numero_cliente);
+        $user->save();
 
-            $cliente = new Cliente();
-            $cliente->user_id = $user->id;
-            $cliente->desarrollador = $request->Desarrollador;
-            $cliente->municipio = $request->Municipio;
-            $cliente->condominio_id = $request->Condominio;
-            $cliente->numero_cliente = $request->Numero_cliente;
-            $cliente->nombre = $request->Nombre_completo;
-            $cliente->coopropietario = $request->Coopropietario;
-            $cliente->telefono = $request->Telefono;
-            $cliente->fecha_escrituracion = $request->Fecha_escrituracion;
-            $cliente->fecha_poliza = $request->Fecha_poliza;
-            $cliente->fecha_entrega = $request->Fecha_entrega;
-            $cliente->comentarios = $request->Comentarios;
-            $cliente->save();
-        });
+        $cliente = new Cliente();
+        $cliente->user_id = $user->id;
+        $cliente->desarrollador = $request->Desarrollador;
+        $cliente->municipio = $request->Municipio;
+        $cliente->condominio_id = $request->Condominio;
+        $cliente->numero_cliente = $request->Numero_cliente;
+        $cliente->nombre = $request->Nombre_completo;
+        $cliente->coopropietario = $request->Coopropietario;
+        $cliente->telefono = $request->Telefono;
+        $cliente->fecha_escrituracion = $request->Fecha_escrituracion;
+        $cliente->fecha_poliza = $request->Fecha_poliza;
+        $cliente->fecha_entrega = $request->Fecha_entrega;
+        $cliente->comentarios = $request->Comentarios;
+        $cliente->save();
 
 
         return redirect()->route('clientes.show', $cliente->id)

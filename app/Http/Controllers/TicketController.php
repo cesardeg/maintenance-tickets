@@ -227,11 +227,12 @@ class TicketController extends Controller
             ->with('message', 'Ticket eliminado correctamente');
     }
 
-    public function genaratePDF($ticket_id)
+    public function genaratePDF(Request $request, $ticket_id)
     {
         $ticket = Ticket::findOrFail($ticket_id);
+        $contratista_id = $request->user()->contratista?->id;
 
-        $pdf = PDF::loadView('pdf.dictamen', compact('ticket'));
+        $pdf = PDF::loadView('pdf.dictamen', compact('ticket', 'contratista_id'));
         return $pdf->download('Dictamen' . $ticket_id . '.pdf');
     }
 

@@ -40,8 +40,18 @@ class Coordinador extends Model
         return $this->hasMany(Ticket::class, 'cat_id');
     }
 
+    public function condominio()
+    {
+        return $this->belongsTo(Condominio::class);
+    }
+
     public function getAgendaAttribute()
     {
         return $this->agenda_cat;
+    }
+
+    public function getProyectoAttribute($value)
+    {
+        return $this->condominio?->nombre ?? $value;
     }
 }

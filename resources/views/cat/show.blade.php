@@ -61,7 +61,7 @@
 					</div>
 					<div class="col-sm-6">
 						<div class="form-group">
-							<label for="Proyecto">Proyecto urbanístico o frente</label>
+							<label for="Proyecto">Condominio</label>
 							<input type="text" class="form-control" name="Proyecto" value="{{ $cat->proyecto }}" disabled>
 						</div>
 					</div>

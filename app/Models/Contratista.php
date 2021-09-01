@@ -35,8 +35,28 @@ class Contratista extends Model
         return $this->belongsTo(AgendaTc::class);
     }
 
+    public function condominio()
+    {
+        return $this->belongsTo(Condominio::class);
+    }
+
+    public function cat()
+    {
+        return $this->belongsTo(Coordinador::class);
+    }
+
     public function getAgendaAttribute()
     {
         return $this->agenda_tc;
+    }
+
+    public function getProyectoAttribute($value)
+    {
+        return $this->condominio?->nombre ?? $value;
+    }
+
+    public function getCoordinadorAttribute($value)
+    {
+        return $this->cat?->nombre ?? $value;
     }
 }

@@ -32,7 +32,7 @@ class CoordinadorStore extends FormRequest
         return [
             "Desarrollador"    => "required|string",
             "Municipio"        => "required|string",
-            "Proyecto"         => "required|string",
+            "condominio"        => "required|exists:condominios,id",
             "Numero_cat"       => "required|integer|unique:cat,numero_cat,{$id}",
             "Nombre_cat"       => "required|string",
             "Correo"           => "required|email|unique:users,email,{$user?->id}",
@@ -62,8 +62,9 @@ class CoordinadorStore extends FormRequest
     public function attributes()
     {
         return [
-            'Numero_cat'      => 'Número de CAT',
-            'Telefono'        => 'Teléfono',
+            'Numero_cat'       => 'Número de CAT',
+            'Telefono'         => 'Teléfono',
+            'condominio'       => 'Condominio',
             'acat_lunes_i'     => 'Horario inicio Lunes',
             'acat_lunes_t'     => 'Horario fin Lunes',
             'acat_martes_i'    => 'Horario inicio Martes',

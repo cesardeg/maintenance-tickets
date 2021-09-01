@@ -22,7 +22,7 @@ class LoginController extends Controller
         ]);
 
         if (Auth::attempt($validator, request('remember') == 1)) {
-            return redirect()->route('dashboard');
+            return redirect()->intended('/dashboard');
         }
 
         return back()

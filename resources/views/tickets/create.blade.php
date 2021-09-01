@@ -212,6 +212,8 @@ $('#fecha-reporte').datetimepicker({
 const familias = @json($familias);
 const ubicaciones = @json($ubicaciones);
 
+const byNameAsc = (a, b) => a.nombre > b.nombre;
+
 function cambiarClientes(element) {
     const selectClientes = $('#cliente');
     selectClientes.children('option:gt(0)').remove();
@@ -245,10 +247,10 @@ function cambiarOpciones(nodo, index) {
     }
 
     selectConceptos.append(
-        familia.conceptos.map((concepto) => $('<option />', { value: concepto.id }).text(concepto.nombre))
+        familia.conceptos.sort(byNameAsc).map((concepto) => $('<option />', { value: concepto.id }).text(concepto.nombre))
     );
     selectFallas.append(
-        familia.fallas.map((falla) => $('<option />', { value: falla.id }).text(falla.nombre))
+        familia.fallas.sort(byNameAsc).map((falla) => $('<option />', { value: falla.id }).text(falla.nombre))
     );
 }
 
@@ -267,7 +269,7 @@ function agregarFalla() {
                 }).append([
                     $('<option />', {value: '', selected: true}).text('Selecciona familia...')
                 ].concat(
-                    Object.values(familias).map((familia) => $('<option />', {
+                    Object.values(familias).sort(byNameAsc).map((familia) => $('<option />', {
                         value: familia.id,
                     }).text(familia.nombre))
                 ))
@@ -307,7 +309,7 @@ function agregarFalla() {
                 }).append([
                     $('<option />', {value: '', selected: true}).text('Selecciona ubicación...')
                 ].concat(
-                    ubicaciones.map((ubicacion) => $('<option />', {
+                    ubicaciones.sort(byNameAsc).map((ubicacion) => $('<option />', {
                         value: ubicacion.id,
                     }).text(ubicacion.nombre))
                 ))

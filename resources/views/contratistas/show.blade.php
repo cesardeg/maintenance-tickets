@@ -95,18 +95,18 @@
 							<input type="text" class="form-control" name="Telefono" placeholder="Teléfono" value="{{ $contratista->telefono }}" disabled>
 						</div>
 					</div>
-					<div class="col-sm-6">
+					<!--div class="col-sm-6">
 						<div class="form-group">
 							<label for="fecha_producto_obra" >Fecha de entrega del producto a obra</label>
 							<input type="text" class="form-control" name="fecha_producto_obra" value="{{ $contratista->fecha_producto_obra }}" disabled>
 						</div>
-					</div>
-					<div class="col-sm-6">
+					</div-->
+					<!--div class="col-sm-6">
 						<div class="form-group">
 							<label for="Fecha_producto_a_vivienda" >Fecha de entrega del producto a entrega vivienda</label>
 							<input type="text" class="form-control" name="Fecha_producto_a_vivienda" value="{{ $contratista->fecha_producto_vivienda }}" disabled>
 						</div>
-					</div>
+					</div-->
 					<div class="col-sm-6">
 						<div class="form-group">
 							<label for="Cat_asignado">Coordinador de atención técnica asignado</label>

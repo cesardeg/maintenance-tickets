@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Condominio;
 use App\Models\User;
 use App\Models\AgendaTc;
 use App\Models\AgendaCat;
 use App\Models\Contratista;
+use App\Models\Coordinador;
 use App\Http\Requests\ContratistaStore;
 
 class ContratistaController extends Controller
@@ -43,7 +45,9 @@ class ContratistaController extends Controller
      */
     public function create()
     {
-        return view('contratistas.create');
+        $condominios = Condominio::all();
+        $cats = Coordinador::all();
+        return view('contratistas.create', compact('condominios', 'cats'));
     }
 
     /**
@@ -97,8 +101,13 @@ class ContratistaController extends Controller
      */
     public function edit(Contratista $contratista)
     {
+        $condominios = Condominio::all();
+        $cats = Coordinador::all();
+
         return view('contratistas.edit', array(
-            'contratista' => $contratista
+            'contratista' => $contratista,
+            'condominios'  => $condominios,
+            'cats' => $cats,
         ));
     }
 
@@ -149,14 +158,14 @@ class ContratistaController extends Controller
         $contratista->user_id = $user->id;
         $contratista->desarrollador = $request->desarrollador;
         $contratista->municipio = $request->municipio;
-        $contratista->proyecto = $request->proyecto;
+        $contratista->condominio_id = $request->condominio;
         $contratista->numero_contratista = $request->numero_contratista;
         $contratista->empresa = $request->empresa;
         $contratista->nombre = $request->nombre;
         $contratista->telefono = $request->telefono;
-        $contratista->fecha_producto_obra = $request->fecha_producto_obra;
-        $contratista->fecha_producto_vivienda = $request->fecha_producto_vivienda;
-        $contratista->coordinador = $request->coordinador;
+        $contratista->fecha_producto_obra = $request->fecha_producto_obra ?? "";
+        $contratista->fecha_producto_vivienda = $request->fecha_producto_vivienda ?? "";
+        $contratista->cat_id = $request->cat_id;
         $contratista->agenda_tc_id = $agenda_tc->id;
 
         return $contratista;

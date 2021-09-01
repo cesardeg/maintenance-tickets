@@ -64,8 +64,15 @@
 						</div>
 						<div class="col-sm-6">
 							<div class="form-group">
-								<label for="Proyecto">Proyecto urbanístico o frente</label>
-								<input type="text" class="form-control" name="proyecto" placeholder="Proyecto urbanístico o frente" value="{{ old('proyecto') }}">
+								<label for="Condominio">Condominio</label>
+								<select class="form-control" name="condominio" required>
+									<option value="" selected disabled>Selecciona condominio</option>
+									@foreach ($condominios as $condominio)
+                  					<option value="{{ $condominio->id }}" {{ old('condominio') == $condominio['id'] ? 'selected' : '' }}>
+										{{ $condominio->nombre }}
+									</option>
+                  					@endforeach
+								</select>
 							</div>
 						</div>
 						<div class="col-sm-6">
@@ -98,7 +105,7 @@
 								<input type="text" class="form-control" name="telefono" placeholder="Teléfono" value="{{ old('telefono') }}">
 							</div>
 						</div>
-						<div class="col-sm-6">
+						<!--div class="col-sm-6">
 							<div class="form-group">
 								<label for="fecha_producto_obra" >Fecha de entrega del producto a obra</label>
 								<div class="input-group date" id="fecha_producto_obra" data-target-input="nearest">
@@ -108,8 +115,8 @@
 									</div>
 								</div>
 							</div>
-						</div>
-						<div class="col-sm-6">
+						</div-->
+						<!--div class="col-sm-6">
 							<div class="form-group">
 								<label for="Fecha_producto_a_vivienda" >Fecha de entrega del producto a entrega vivienda</label>
 								<div class="input-group date" id="fecha_producto_vivienda" data-target-input="nearest">
@@ -119,11 +126,18 @@
 									</div>
 								</div>
 							</div>
-						</div>
+						</div-->
 						<div class="col-sm-6">
 							<div class="form-group">
-								<label for="Cat_asignado">Coordinador de atención técnica asignado</label>
-								<input type="text" class="form-control" name="coordinador" placeholder="Coordinador de atención técnica asignado" value="{{ old('coordinador') }}">
+								<label for="Condominio">Coordinador de atención técnica asignado</label>
+								<select class="form-control" name="cat_id" required>
+									<option value="" selected disabled>Selecciona CAT</option>
+									@foreach ($cats as $cat)
+                  					<option value="{{ $cat->id }}" {{ old('cat_id') == $cat['id'] ? 'selected' : '' }}>
+										{{ $cat->nombre }}
+									</option>
+                  					@endforeach
+								</select>
 							</div>
 						</div>
 						<div class="col-sm-6">
@@ -188,7 +202,7 @@
 								<!-- Miercoles -->
 								<div class="row" style="margin: 5px;">
 									<div class="col-2">
-										<label for="atc_miercoles" class="custom-control">Miercoles</label>
+										<label for="atc_miercoles" class="custom-control">Miércoles</label>
 									</div>
 									<div class="input-group date schedule-time col" id="act_mier_inicio" data-target-input="nearest">
 										<input type="text" name="atc_miercoles_i" class="form-control datetimepicker-input" data-target="#act_mier_inicio" value="{{ old('atc_miercoles_i') }}"/>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Condominio;
 use App\Models\Coordinador;
 use App\Models\AgendaCat;
 use App\Models\User;
@@ -43,7 +44,8 @@ class CoordinadorController extends Controller
      */
     public function create()
     {
-        return view('cat.create');
+        $condominios = Condominio::all();
+        return view('cat.create', compact('condominios'));
     }
 
     /**
@@ -97,8 +99,10 @@ class CoordinadorController extends Controller
      */
     public function edit(Coordinador $cat)
     {
+        $condominios = Condominio::all();
         return view('cat.edit', array(
-            'cat' => $cat
+            'cat' => $cat,
+            'condominios' => $condominios,
         ));
     }
 
@@ -149,7 +153,7 @@ class CoordinadorController extends Controller
         $cat->user_id = $user->id;
         $cat->desarrollador = $request->Desarrollador;
         $cat->municipio = $request->Municipio;
-        $cat->proyecto = $request->Proyecto;
+        $cat->condominio_id = $request->condominio;
         $cat->numero_cat = $request->Numero_cat;
         $cat->nombre = $request->Nombre_cat;
         $cat->telefono = $request->Telefono;

@@ -53,43 +53,50 @@
 						<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Desarrollador">Desarrollador</label>
-								<input type="text" class="form-control" name="Desarrollador" placeholder="Desarrollador" value="{{ old('Desarrollador', 'Grupo Trazo') }}">
+								<input type="text" class="form-control" name="Desarrollador" placeholder="Desarrollador" value="{{ old('Desarrollador', 'Grupo Trazo') }}" required>
 							</div>
 						</div>
 						<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Municipio">Municipio</label>
-								<input type="text" class="form-control" name="Municipio" placeholder="Municipio" value="{{ old('Municipio') }}">
+								<input type="text" class="form-control" name="Municipio" placeholder="Municipio" value="{{ old('Municipio') }}" required>
 							</div>
 						</div>
 						<div class="col-sm-6">
 							<div class="form-group">
-								<label for="Proyecto">Proyecto urbanístico o frente</label>
-								<input type="text" class="form-control" name="Proyecto" placeholder="Proyecto urbanístico o frente" value="{{ old('Proyecto') }}">
+								<label for="Condominio">Condominio</label>
+								<select class="form-control" name="condominio" required>
+									<option value="" selected disabled>Selecciona condominio</option>
+									@foreach ($condominios as $condominio)
+                  					<option value="{{ $condominio->id }}" {{ old('condominio') == $condominio['id'] ? 'selected' : '' }}>
+										{{ $condominio->nombre }}
+									</option>
+                  					@endforeach
+								</select>
 							</div>
 						</div>
 						<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Numero_cat">Número de CAT</label>
-								<input type="text" class="form-control" name="Numero_cat" placeholder="Número de CAT" value="{{ old('Numero_cat') }}">
+								<input type="text" class="form-control" name="Numero_cat" placeholder="Número de CAT" value="{{ old('Numero_cat') }}" required>
 							</div>
 						</div>
 						<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Nombre_cat">Nombre completo del CAT</label>
-								<input type="text" class="form-control" name="Nombre_cat" placeholder="Nombre completo del CAT" value="{{ old('Nombre_cat') }}">
+								<input type="text" class="form-control" name="Nombre_cat" placeholder="Nombre completo del CAT" value="{{ old('Nombre_cat') }}" required>
 							</div>
 						</div>
             			<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Correo">Correo</label>
-								<input type="text" class="form-control" name="Correo" placeholder="Correo" value="{{ old('Correo') }}">
+								<input type="text" class="form-control" name="Correo" placeholder="Correo" value="{{ old('Correo') }}" required>
 							</div>
 						</div>
             			<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Telefono">Teléfono</label>
-								<input type="text" class="form-control" name="Telefono" placeholder="Teléfono" value="{{ old('Telefono') }}">
+								<input type="text" class="form-control" name="Telefono" placeholder="Teléfono" value="{{ old('Telefono') }}" required>
 							</div>
 						</div>
 						<div class="col-sm-6">
@@ -154,7 +161,7 @@
 									<!-- Miercoles -->
 									<div class="row" style="margin: 5px;">
 										<div class="col-2">
-											<label for="acat_miercoles" class="custom-control">Miercoles</label>
+											<label for="acat_miercoles" class="custom-control">Miércoles</label>
 										</div>
 										<div class="input-group date col schedule-time" id="acat_mier_inicio" data-target-input="nearest">
 											<input type="text" name="acat_miercoles_i" class="form-control datetimepicker-input" data-target="#acat_mier_inicio" value="{{ old('acat_miercoles_i') }}"/>

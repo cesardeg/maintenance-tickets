@@ -64,6 +64,7 @@
             </tr>
 
             @foreach ($ticket->detalles as $key => $detalle)
+            @if($contratista_id == null || $detalle->manpowers->map->contratista_id->contains($contratista_id))
                 <tr>
                     <td colspan="3" class="text-center">
                         FALLA NO.{{ $key + 1 }}
@@ -93,6 +94,7 @@
                     </td>
                 </tr>
                 @foreach($detalle->manpowers as $manpower)
+                @if($contratista_id == null || $manpower->contratista_id == $contratista_id)
                 <tr>
                     <td>
                         CONTRATISTA: <br> {{ $manpower->contratista?->nombre }}
@@ -106,7 +108,9 @@
                         FECHA DE ATENCIÓN: <br> {{ $manpower->trabajado_desde?->format('d/m/Y H:i') ?? 'N/D' }}
                     </td>
                 </tr>
+                @endif
                 @endforeach
+            @endif
             @endforeach
             <tr>
                 <td colspan="2" class="mt-5">
@@ -117,7 +121,7 @@
                 <td colspan="2" class="mt-5">
                     ______________________________________
                     <br>
-                    NOMBRE Y FIRMA DEL TÉCNICO DE TRAZO
+                    NOMBRE Y FIRMA DEL CONTRATISTA
                 </td>
             </tr>
         </table>

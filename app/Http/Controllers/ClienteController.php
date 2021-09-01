@@ -7,6 +7,7 @@ use App\Models\Condominio;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\ClienteStore;
 
 class ClienteController extends Controller
 {
@@ -62,23 +63,8 @@ class ClienteController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ClienteStore $request)
     {
-        $validator = $this->validate($request, [
-            "Desarrollador" => "required|string",
-            "Municipio" => "required|string",
-            "Condominio" => "required|string",
-            "Numero_cliente" => "required|string",
-            "Nombre_completo" => "required|string",
-            "Coopropietario" => "nullable|string",
-            "Correo" => "required|email|unique:users,email",
-            "Telefono" => "required|digits:10",
-            "Fecha_escrituracion" => "required|date_format:Y-m-d",
-            "Fecha_poliza" => "required|date_format:Y-m-d",
-            "Fecha_entrega" => "required|date_format:Y-m-d",
-            "Comentarios" => "nullable|string"
-        ]);
-
         DB::beginTransaction();
 
         $user = new User();
@@ -103,7 +89,6 @@ class ClienteController extends Controller
         $cliente->save();
 
         DB::commit();
-
 
         return redirect()->route('clientes.show', $cliente->id)
                     ->with('message', 'Se ha registrado al cliente correctamente');
@@ -151,23 +136,11 @@ class ClienteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Cliente $cliente)
+    public function update(ClienteStore $request, Cliente $cliente)
     {
+        DB::beginTransaction();
+
         $user = $cliente->user()->firstOrFail();
-        $validator = $this->validate($request, [
-            "Desarrollador" => "required|string",
-            "Municipio" => "required|string",
-            "Condominio" => "required|string",
-            "Numero_cliente" => "required|string",
-            "Nombre_completo" => "required|string",
-            "Coopropietario" => "nullable|string",
-            "Correo" => "required|email|unique:users,email," . $user->id,
-            "Telefono" => "required|digits:10",
-            "Fecha_escrituracion" => "required|string",
-            "Fecha_poliza" => "required|string",
-            "Fecha_entrega" => "required|string",
-            "Comentarios" => "nullable|string"
-        ]);
 
         if ($request->Correo != $user->email) {
             $user = User::findOrFail($cliente->user_id);
@@ -187,6 +160,8 @@ class ClienteController extends Controller
         $cliente->fecha_entrega = $request->Fecha_entrega;
         $cliente->comentarios = $request->Comentarios;
         $cliente->save();
+
+        DB::commit();
 
         return redirect()->route('clientes.show', $cliente->id)
                 ->with('message', 'Se ha actualizado al cliente correctamente');

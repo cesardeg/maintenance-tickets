@@ -54,43 +54,50 @@
 						<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Desarrollador">Desarrollador</label>
-								<input type="text" class="form-control" name="Desarrollador" placeholder="Desarrollador" value="{{ old('Desarrollador', $cat->desarrollador) }}">
+								<input type="text" class="form-control" name="Desarrollador" placeholder="Desarrollador" value="{{ old('Desarrollador', $cat->desarrollador) }}" required>
 							</div>
 						</div>
 						<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Municipio">Municipio</label>
-								<input type="text" class="form-control" name="Municipio" placeholder="Municipio" value="{{ old('Municipio', $cat->municipio) }}">
+								<input type="text" class="form-control" name="Municipio" placeholder="Municipio" value="{{ old('Municipio', $cat->municipio) }}" required>
 							</div>
 						</div>
 						<div class="col-sm-6">
 							<div class="form-group">
-								<label for="Proyecto">Proyecto urbanístico o frente</label>
-								<input type="text" class="form-control" name="Proyecto" placeholder="Proyecto urbanístico o frente" value="{{ old('Proyecto', $cat->proyecto) }}">
+								<label for="Condominio">Condominio</label>
+								<select class="form-control" name="condominio" required>
+									<option value="" selected disabled>Selecciona condominio</option>
+									@foreach ($condominios as $condominio)
+                  					<option value="{{ $condominio->id }}" {{ old('condominio', $cat['condominio_id']) == $condominio['id'] ? 'selected' : '' }}>
+										  {{ $condominio->nombre }}
+									</option>
+                  					@endforeach
+								</select>
 							</div>
 						</div>
 						<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Numero_cat">Número de CAT</label>
-								<input type="text" class="form-control" name="Numero_cat" placeholder="Número de CAT" value="{{ old('Numero_cat', $cat->numero_cat) }}">
+								<input type="text" class="form-control" name="Numero_cat" placeholder="Número de CAT" value="{{ old('Numero_cat', $cat->numero_cat) }}" required>
 							</div>
 						</div>
 						<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Nombre_responsable">Nombre del CAT</label>
-								<input type="text" class="form-control" name="Nombre_cat" placeholder="Nombre del CAT" value="{{ old('Nombre_cat', $cat->nombre) }}">
+								<input type="text" class="form-control" name="Nombre_cat" placeholder="Nombre del CAT" value="{{ old('Nombre_cat', $cat->nombre) }}" required>
 							</div>
 						</div>
-            <div class="col-sm-6">
+            			<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Correo">Correo</label>
-								<input type="text" class="form-control" name="Correo" placeholder="Correo" value="{{ old('Correo', $cat->user->email) }}">
+								<input type="text" class="form-control" name="Correo" placeholder="Correo" value="{{ old('Correo', $cat->user->email) }}" required>
 							</div>
 						</div>
             			<div class="col-sm-6">
 							<div class="form-group">
 								<label for="Telefono">Teléfono</label>
-								<input type="text" class="form-control" name="Telefono" placeholder="Teléfono" value="{{ old('Telefono', $cat->telefono) }}">
+								<input type="text" class="form-control" name="Telefono" placeholder="Teléfono" value="{{ old('Telefono', $cat->telefono) }}" required>
 							</div>
 						</div>
 						<div class="col-sm-6">
@@ -155,7 +162,7 @@
 									<!-- Miercoles -->
 									<div class="row" style="margin: 5px;">
 										<div class="col-2">
-											<label for="acat_miercoles" class="custom-control">Miercoles</label>
+											<label for="acat_miercoles" class="custom-control">Miércoles</label>
 										</div>
 										<div class="input-group schedule-time col" id="acat_mier_inicio" data-target-input="nearest">
 											<input type="text" name="acat_miercoles_i" class="form-control datetimepicker-input" data-target="#acat_mier_inicio" value="{{ old('acat_miercoles_i', $cat->agenda_cat->mier_i) }}"/>

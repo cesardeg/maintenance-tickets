@@ -162,7 +162,7 @@
 				@if ($contratista->agenda_tc->mier_i != null)
 				<!-- Miercoles -->
 				<div class="row justify-content-center" style="margin: 5px;">
-					<p>Miercoles de {{ $contratista->agenda_tc->mier_i }} a {{ $contratista->agenda_tc->mier_t }}</p>
+					<p>Miércoles de {{ $contratista->agenda_tc->mier_i }} a {{ $contratista->agenda_tc->mier_t }}</p>
 				</div>
 				@endif
 

@@ -125,7 +125,7 @@
 								@if (  $cat->agenda_cat->mier_i != null )
 								<!-- Miercoles -->
 								<div class="row justify-content-center" style="margin: 5px;">
-									<p>Miercoles de {{ $cat->agenda_cat->mier_i }} a {{ $cat->agenda_cat->mier_t }}</p>
+									<p>Miércoles de {{ $cat->agenda_cat->mier_i }} a {{ $cat->agenda_cat->mier_t }}</p>
 								</div>
 								@endif
 

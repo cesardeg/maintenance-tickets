@@ -79,6 +79,8 @@ class ClienteController extends Controller
             "Comentarios" => "nullable|string"
         ]);
 
+        DB::beginTransaction();
+
         $user = new User();
         $user->email = $request->Correo;
         $user->type = 'cliente';
@@ -99,6 +101,8 @@ class ClienteController extends Controller
         $cliente->fecha_entrega = $request->Fecha_entrega;
         $cliente->comentarios = $request->Comentarios;
         $cliente->save();
+
+        DB::commit();
 
 
         return redirect()->route('clientes.show', $cliente->id)

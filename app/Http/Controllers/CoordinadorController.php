@@ -54,21 +54,23 @@ class CoordinadorController extends Controller
      */
     public function store(CoordinadorStore $request)
     {
-        DB::transaction(function () use ($request) {
-            $user = new User();
-            $user->email = $request->Correo;
-            $user->type = 'coordinador';
-            $user->password = bcrypt($request->Numero_cat);
-            $user->save();
-    
-            $agenda_cat = new AgendaCat();
-            $agenda_cat = self::agenda_cat($agenda_cat, $request);
-            $agenda_cat->save();
-    
-            $cat = new Coordinador();
-            $cat = self::coordinador($cat, $user, $agenda_cat, $request);
-            $cat->save();
-        });
+        DB::beginTransaction();
+
+        $user = new User();
+        $user->email = $request->Correo;
+        $user->type = 'coordinador';
+        $user->password = bcrypt($request->Numero_cat);
+        $user->save();
+
+        $agenda_cat = new AgendaCat();
+        $agenda_cat = self::agenda_cat($agenda_cat, $request);
+        $agenda_cat->save();
+
+        $cat = new Coordinador();
+        $cat = self::coordinador($cat, $user, $agenda_cat, $request);
+        $cat->save();
+
+        DB::commit();
 
         return redirect()->route('cat.show', $cat->id)
             ->with('message', 'Se ha registrado al CAT correctamente');

@@ -16,6 +16,15 @@ class Ticket extends Model
      */
     protected $dates = ['cita_cat', 'cita_cat_fin', 'fecha_finalizado'];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'estado' => 'integer',
+    ];
+
     //Relationships
     public function condominio()
     {

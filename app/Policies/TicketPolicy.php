@@ -31,7 +31,7 @@ class TicketPolicy
     public function view(User $user, Ticket $ticket)
     {
         if ($user->es_admin) {
-            return true;
+            return $user->condominios->contains($ticket->condominio_id);
         }
         if ($user->es_cliente) {
             return $ticket->cliente_id === $user->cliente->id;
@@ -42,6 +42,7 @@ class TicketPolicy
         if ($user->es_contratista) {
             return $ticket->manpowers->contains('contratista_id', $user->contratista->id);
         }
+
         return false;
     }
 
@@ -66,13 +67,7 @@ class TicketPolicy
     public function update(User $user, Ticket $ticket)
     {
         if ($user->es_admin) {
-            return true;
-        }
-        if ($user->es_coordinador) {
-            return true;
-        }
-        if ($user->es_contratista) {
-            return true;
+            return $user->condominios->contains($ticket->condominio_id);
         }
         return false;
     }
@@ -86,7 +81,7 @@ class TicketPolicy
      */
     public function delete(User $user, Ticket $ticket)
     {
-        return $user->es_admin;
+        return $user->es_admin && $user->condominios->contains($ticket->condominio_id);
     }
 
     /**
@@ -98,7 +93,7 @@ class TicketPolicy
      */
     public function restore(User $user, Ticket $ticket)
     {
-        return $user->es_admin;
+        return $user->es_admin && $user->condominios->contains($ticket->condominio_id);
     }
 
     /**
@@ -110,7 +105,7 @@ class TicketPolicy
      */
     public function forceDelete(User $user, Ticket $ticket)
     {
-        return $user->es_admin;
+        return $user->es_admin && $user->condominios->contains($ticket->condominio_id);
     }
 
     /**
@@ -122,17 +117,32 @@ class TicketPolicy
      */
     public function asignarCat(User $user, Ticket $ticket)
     {
-        return $user->es_admin;
+        return $user->es_admin && $user->condominios->contains($ticket->condominio_id);
     }
 
  
     public function contestarEncuesta(User $user, Ticket $ticket)
     {
-        return $ticket->finalizado && ($user->es_admin || $user->es_cliente);
+        if (!$ticket->finalizado) {
+            return false;
+        }
+        if ($user->es_admin) {
+            return $user->condominios->contains($ticket->condominio_id);
+        }
+        if ($user->es_cliente) {
+            return $ticket->cliente_id === $user->cliente->id;
+        }
+        return false;
     }
 
     public function finalizar(User $user, Ticket $ticket)
     {
-        return $ticket->valorado && $user->es_admin;
+        if (!$ticket->valorado) {
+            return false;
+        }
+        if ($user->es_admin) {
+            return $user->condominios->contains($ticket->condominio_id);
+        }
+        return false;
     }
 }

@@ -28,13 +28,17 @@ class ClienteController extends Controller
      */
     public function index(Request $request)
     {
-        $condominios = Condominio::all();
+        $user = auth()->user();
+        $condominios = $user->condominios;
+
         $qry = Cliente::with('condominio', 'user')->where('status', 'active')->latest();
         if ($request->buscar) {
             $qry->buscar($request->buscar);
         }
         if ($request->condominio_id) {
             $qry->where('clientes.condominio_id', $request->condominio_id);
+        } else {
+            $qry->whereIn('clientes.condominio_id', $condominios->map->id);
         }
         $clientes = $qry->paginate()->appends($request->all());
 
@@ -51,7 +55,9 @@ class ClienteController extends Controller
      */
     public function create()
     {
-        $condominios = Condominio::get();
+        $user = auth()->user();
+        $condominios = $user->condominios;
+
         return view('clientes.create', array(
             'condominios' =>  $condominios
         ));
@@ -121,7 +127,8 @@ class ClienteController extends Controller
      */
     public function edit(Cliente $cliente)
     {
-        $condominios = Condominio::get();
+        $user = auth()->user();
+        $condominios = $user->condominios;
 
         return view('clientes.edit', array(
             'cliente' => $cliente,

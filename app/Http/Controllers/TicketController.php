@@ -16,6 +16,7 @@ use App\Models\Ubicacion;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use App\Http\Requests\TicketStore;
 use App\Http\Requests\TicketCoordinadorUpdate;
 use App\Http\Requests\TicketFinalizar;
@@ -36,28 +37,38 @@ class TicketController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
+        $condominios = $user->es_admin
+            ? $user->condominios
+            : ($user->es_cliente
+                ? collect(Arr::wrap($user->cliente->condominio))
+                : Condominio::all()
+            );
+
         $qry = Ticket::with('condominio', 'cliente')->latest('id');
 
         if ($user->es_cliente) {
             $qry->where('cliente_id', $user->cliente->id);
-        }
-        if ($user->es_contratista) {
+        } else if ($user->es_contratista) {
             $qry->whereHas('manpowers', fn($power) => $power->where('manpowers.contratista_id', $user->contratista->id));
-        }
-        if ($user->es_coordinador) {
+        } else if ($user->es_coordinador) {
             $qry->where('cat_id', $user->cat->id);
+        } else {
+            $qry->whereIn('condominio_id', $condominios->map->id);
         }
+
         if ($request->buscar) {
             $qry->buscar($request->buscar);
         }
+
         if ($request->estado !== null) {
             $qry->where('estado', $request->estado);
         }
+
         if ($request->condominio_id) {
             $qry->where('condominio_id', $request->condominio_id);
         }
+
         $tickets = $qry->paginate()->appends($request->all());
-        $condominios = Condominio::all();
         $estados = TicketStatus::toArray();
 
         return view('tickets.index', compact(
@@ -72,7 +83,8 @@ class TicketController extends Controller
      */
     public function create()
     {
-        $condominios = Condominio::get();
+        $user = auth()->user();
+        $condominios = $user->condominios;
         $clientes = old('condominio_id')
             ? Cliente::where('condominio_id', old('condominio_id'))->get()
             : [];

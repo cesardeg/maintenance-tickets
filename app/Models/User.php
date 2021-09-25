@@ -55,6 +55,11 @@ class User extends Authenticatable
         return $this->hasOne(Contratista::class, 'user_id', 'id');
     }
 
+    public function condominios()
+    {
+        return $this->belongsToMany(Condominio::class, 'user_condominio');
+    }
+
     public function getEsClienteAttribute()
     {
         return $this->type === 'cliente' && $this->cliente !== null;

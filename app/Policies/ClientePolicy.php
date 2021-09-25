@@ -30,7 +30,7 @@ class ClientePolicy
      */
     public function view(User $user, Cliente $cliente)
     {
-        return $user->es_admin;
+        return $user->es_admin && $user->condominios->contains($cliente->condominio_id);
     }
 
     /**

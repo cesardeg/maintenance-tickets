@@ -45,7 +45,9 @@ class ContratistaController extends Controller
      */
     public function create()
     {
-        $condominios = Condominio::all();
+        $user = auth()->user();
+        $condominios = $user->condominios;
+
         $cats = Coordinador::all();
         return view('contratistas.create', compact('condominios', 'cats'));
     }
@@ -101,7 +103,8 @@ class ContratistaController extends Controller
      */
     public function edit(Contratista $contratista)
     {
-        $condominios = Condominio::all();
+        $user = auth()->user();
+        $condominios = $user->condominios;
         $cats = Coordinador::all();
 
         return view('contratistas.edit', array(

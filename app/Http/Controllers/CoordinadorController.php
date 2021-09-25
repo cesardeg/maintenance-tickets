@@ -44,7 +44,8 @@ class CoordinadorController extends Controller
      */
     public function create()
     {
-        $condominios = Condominio::all();
+        $user = auth()->user();
+        $condominios = $user->condominios;
         return view('cat.create', compact('condominios'));
     }
 
@@ -99,7 +100,8 @@ class CoordinadorController extends Controller
      */
     public function edit(Coordinador $cat)
     {
-        $condominios = Condominio::all();
+        $user = auth()->user();
+        $condominios = $user->condominios;
         return view('cat.edit', array(
             'cat' => $cat,
             'condominios' => $condominios,
